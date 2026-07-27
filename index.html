@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0B1E26">
+<title>Feldblick</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="vendor/leaflet.css">
+<style>
+:root{
+  --ink:#0B1E26;          /* Tiefes Petrol, Gehäusefarbe */
+  --ink-2:#12303A;        /* Flächen */
+  --ink-3:#1D4650;        /* Linien, Höhenschichtlinien */
+  --sand:#E9DFC9;         /* Schrift */
+  --sand-dim:#9FAAA6;
+  --bearing:#FF6A2B;      /* Richtung */
+  --relief:#C58A4E;       /* Höhe */
+  --grid:#5FB2D6;         /* Position */
+  --alarm:#E24B4B;
+  --r:3px;
+  --sans:system-ui,"Roboto",sans-serif;
+  --cond:"Roboto Condensed","Arial Narrow",system-ui,sans-serif;
+  --mono:"Roboto Mono",ui-monospace,"DejaVu Sans Mono",monospace;
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--ink);color:var(--sand);font-family:var(--sans)}
+body{display:flex;flex-direction:column}
+
+/* ---------- Typografie ---------- */
+.eyebrow{font-family:var(--cond);text-transform:uppercase;letter-spacing:.18em;font-size:11px;color:var(--sand-dim)}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+h2{font-family:var(--cond);text-transform:uppercase;letter-spacing:.12em;font-size:15px;margin:0;font-weight:600}
+
+/* ---------- Grundgerüst ---------- */
+#views{flex:1;position:relative;overflow:hidden}
+.view{position:absolute;inset:0;display:none;flex-direction:column}
+.view.on{display:flex}
+
+nav{display:flex;border-top:1px solid var(--ink-3);background:var(--ink);padding-bottom:var(--safe-b)}
+nav button{flex:1;background:none;border:0;color:var(--sand-dim);padding:10px 4px 12px;font-family:var(--cond);
+  text-transform:uppercase;letter-spacing:.14em;font-size:11px;display:flex;flex-direction:column;align-items:center;gap:5px}
+nav button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.6}
+nav button[aria-selected="true"]{color:var(--sand)}
+nav button[aria-selected="true"] svg{stroke:var(--bearing)}
+
+/* ---------- Sucher ---------- */
+#stage{position:relative;flex:1;background:#000;overflow:hidden}
+#video{width:100%;height:100%;object-fit:cover;display:block}
+#noCam{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;
+  gap:14px;padding:28px;text-align:center;color:var(--sand-dim);font-size:14px;line-height:1.5}
+
+/* Fadenkreuz + Kegelvorschau */
+#reticle{position:absolute;inset:0;pointer-events:none}
+#reticle .hair{position:absolute;background:rgba(233,223,201,.5)}
+#reticle .h1{left:50%;top:calc(50% - 26px);width:1px;height:16px;transform:translateX(-.5px)}
+#reticle .h2{left:50%;top:calc(50% + 10px);width:1px;height:16px;transform:translateX(-.5px)}
+#reticle .h3{top:50%;left:calc(50% - 26px);height:1px;width:16px}
+#reticle .h4{top:50%;left:calc(50% + 10px);height:1px;width:16px}
+
+/* Peilband */
+#tape{position:absolute;left:0;right:0;top:0;height:52px;overflow:hidden;
+  background:linear-gradient(180deg,rgba(11,30,38,.82),rgba(11,30,38,0))}
+#tapeInner{position:absolute;top:0;bottom:0;left:50%;width:0}
+.tick{position:absolute;top:14px;width:1px;background:var(--sand-dim);height:7px}
+.tick.major{height:13px;background:var(--sand)}
+.tlabel{position:absolute;top:29px;transform:translateX(-50%);font-family:var(--cond);font-size:11px;
+  letter-spacing:.1em;color:var(--sand)}
+.tlabel.card{color:var(--bearing);font-weight:700}
+#tapeMark{position:absolute;left:50%;top:6px;transform:translateX(-50%);width:0;height:0;
+  border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid var(--bearing)}
+#tapeVal{position:absolute;right:9px;top:11px;font-family:var(--mono);font-size:15px;color:var(--bearing);
+  background:rgba(11,30,38,.72);padding:2px 6px;border-radius:var(--r);letter-spacing:.02em}
+
+/* Messwerte über dem Auslöser */
+#readout{position:absolute;left:0;right:0;bottom:0;padding:12px 14px 14px;
+  background:linear-gradient(0deg,rgba(11,30,38,.92),rgba(11,30,38,0));display:flex;gap:10px}
+.cell{flex:1;min-width:0}
+.cell .eyebrow{display:block;margin-bottom:2px}
+.cell .v{font-family:var(--mono);font-size:17px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cell .s{font-family:var(--mono);font-size:10px;color:var(--sand-dim)}
+.c-pos .v{color:var(--grid)} .c-alt .v{color:var(--relief)} .c-dir .v{color:var(--bearing)}
+.stale{opacity:.4}
+
+/* Auslöserleiste */
+#shutterbar{display:flex;align-items:center;justify-content:space-between;padding:12px 22px;gap:16px;background:var(--ink)}
+#shutter{width:68px;height:68px;border-radius:50%;border:2px solid var(--sand);background:var(--bearing);
+  box-shadow:0 0 0 5px var(--ink),0 0 0 6px var(--ink-3);flex:none}
+#shutter:disabled{background:var(--ink-3);border-color:var(--ink-3)}
+#shutter:active{transform:scale(.94)}
+.sidebtn{width:52px;height:52px;border-radius:var(--r);background:var(--ink-2);border:1px solid var(--ink-3);
+  color:var(--sand);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px;font-family:var(--cond);font-size:10px;letter-spacing:.1em}
+.sidebtn .n{font-family:var(--mono);font-size:15px;color:var(--bearing)}
+#lastthumb{width:52px;height:52px;border-radius:var(--r);border:1px solid var(--ink-3);object-fit:cover;background:var(--ink-2)}
+
+/* ---------- Karte ---------- */
+#map{flex:1;background:var(--ink-2)}
+.leaflet-container{background:var(--ink-2);font-family:var(--sans)}
+.mapbar{display:flex;gap:8px;padding:8px 10px;background:var(--ink);border-bottom:1px solid var(--ink-3);align-items:center}
+.pin{width:14px;height:14px;border-radius:50%;background:var(--ink);border:2px solid var(--bearing);
+  box-shadow:0 0 0 2px rgba(233,223,201,.75)}
+.pop{font-family:var(--sans);font-size:12px;color:var(--ink);min-width:186px}
+.pop img{width:100%;border-radius:2px;display:block;margin-bottom:6px}
+.pop b{font-family:var(--mono);font-weight:500}
+.pop .row{display:flex;justify-content:space-between;gap:8px;padding:1px 0}
+
+/* ---------- Listen / Blätter ---------- */
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px;border-bottom:1px solid var(--ink-3)}
+.item{display:flex;gap:12px;padding:12px 14px;border-bottom:1px solid var(--ink-2);align-items:center}
+.item img{width:62px;height:62px;object-fit:cover;border-radius:2px;background:var(--ink-2);flex:none}
+.item .meta{flex:1;min-width:0}
+.item .t{font-family:var(--mono);font-size:12px;color:var(--sand)}
+.item .d{font-family:var(--mono);font-size:11px;color:var(--sand-dim);margin-top:3px;line-height:1.45}
+.item .d i{font-style:normal;color:var(--relief)}
+.item .d u{text-decoration:none;color:var(--bearing)}
+.empty{padding:56px 28px;text-align:center;color:var(--sand-dim);font-size:14px;line-height:1.6}
+
+/* Konturen als leere-Seite-Motiv */
+.contour{display:block;margin:0 auto 18px;width:120px;height:64px;opacity:.55}
+
+button.btn{font-family:var(--cond);text-transform:uppercase;letter-spacing:.12em;font-size:12px;
+  background:var(--ink-2);color:var(--sand);border:1px solid var(--ink-3);border-radius:var(--r);padding:9px 12px}
+button.btn.go{background:var(--bearing);border-color:var(--bearing);color:#1A0A02;font-weight:700}
+button.btn.warn{color:var(--alarm);border-color:#4A2020}
+button.btn:disabled{opacity:.45}
+
+label.field{display:block;padding:13px 14px;border-bottom:1px solid var(--ink-2)}
+label.field .eyebrow{display:block;margin-bottom:7px}
+label.field input[type=number],label.field input[type=text]{width:100%;background:var(--ink-2);border:1px solid var(--ink-3);
+  color:var(--sand);font-family:var(--mono);font-size:15px;padding:9px 10px;border-radius:var(--r)}
+label.field .hint{display:block;margin-top:7px;font-size:11px;color:var(--sand-dim);line-height:1.5}
+input[type=range]{width:100%;accent-color:var(--bearing)}
+.rowline{display:flex;gap:10px;padding:13px 14px;border-bottom:1px solid var(--ink-2);align-items:center;justify-content:space-between}
+
+#toast{position:fixed;left:50%;bottom:calc(88px + var(--safe-b));transform:translate(-50%,14px);opacity:0;
+  background:var(--sand);color:var(--ink);font-family:var(--cond);letter-spacing:.08em;text-transform:uppercase;
+  font-size:12px;padding:9px 15px;border-radius:var(--r);pointer-events:none;transition:.22s;z-index:900;max-width:88vw;text-align:center}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+
+#sheet{position:fixed;inset:0;background:rgba(11,30,38,.96);z-index:800;display:none;flex-direction:column}
+#sheet.on{display:flex}
+#flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:950;transition:opacity .18s}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+:focus-visible{outline:2px solid var(--bearing);outline-offset:2px}
+</style>
+</head>
+<body>
+
+<div id="views">
+
+  <!-- ============ AUFNAHME ============ -->
+  <section class="view on" id="v-cam">
+    <div id="stage">
+      <video id="video" playsinline muted autoplay></video>
+      <div id="noCam">
+        <span class="eyebrow">Kamera nicht aktiv</span>
+        <span id="noCamTxt">Tippe auf „Kamera starten“ und erlaube den Zugriff.</span>
+        <button class="btn go" id="startCam">Kamera starten</button>
+      </div>
+
+      <div id="reticle">
+        <div id="tape">
+          <div id="tapeInner"></div>
+          <div id="tapeMark"></div>
+          <div id="tapeVal">––</div>
+        </div>
+        <div class="hair h1"></div><div class="hair h2"></div>
+        <div class="hair h3"></div><div class="hair h4"></div>
+      </div>
+
+      <div id="readout">
+        <div class="cell c-pos"><span class="eyebrow">Position</span>
+          <div class="v" id="rPos">– – –</div><div class="s" id="rPosS">wartet auf GPS</div></div>
+        <div class="cell c-alt"><span class="eyebrow">Höhe ü. NN</span>
+          <div class="v" id="rAlt">–</div><div class="s" id="rAltS">–</div></div>
+        <div class="cell c-dir"><span class="eyebrow">Richtung</span>
+          <div class="v" id="rDir">–</div><div class="s" id="rDirS">–</div></div>
+      </div>
+    </div>
+
+    <div id="shutterbar">
+      <button class="sidebtn" id="toGps" title="Sensoren freigeben">
+        <span class="n" id="satN">GPS</span><span>Sensor</span></button>
+      <button id="shutter" aria-label="Foto aufnehmen"></button>
+      <img id="lastthumb" alt="Letzte Aufnahme" src="data:image/gif;base64,R0lGODlhAQABAIAAAA8eJv///yH5BAEAAAEALAAAAAABAAEAAAICTAEAOw==">
+    </div>
+  </section>
+
+  <!-- ============ KARTE ============ -->
+  <section class="view" id="v-map">
+    <div class="mapbar">
+      <h2 style="flex:1">Karte</h2>
+      <button class="btn" id="fitAll">Alle zeigen</button>
+      <button class="btn" id="cacheTiles">Offline laden</button>
+    </div>
+    <div id="map"></div>
+  </section>
+
+  <!-- ============ ARCHIV ============ -->
+  <section class="view" id="v-list">
+    <div class="head">
+      <h2>Archiv <span class="num" id="cnt" style="color:var(--bearing)"></span></h2>
+      <div style="display:flex;gap:8px">
+        <button class="btn" id="expGeo">GeoJSON</button>
+        <button class="btn go" id="expZip">Export</button>
+      </div>
+    </div>
+    <div class="scroll" id="listBody"></div>
+  </section>
+
+  <!-- ============ EINSTELLUNGEN ============ -->
+  <section class="view" id="v-set">
+    <div class="head"><h2>Einstellungen</h2><span class="eyebrow" id="ver"></span></div>
+    <div class="scroll">
+      <div class="rowline"><div><div class="eyebrow">Sensoren</div>
+        <div class="num" style="font-size:12px;color:var(--sand-dim)" id="sensState">–</div></div>
+        <button class="btn go" id="askPerm">Freigeben</button></div>
+
+      <label class="field"><span class="eyebrow">Kegel – Reichweite</span>
+        <input type="range" id="setRange" min="10" max="500" step="10">
+        <span class="hint"><span class="num" id="setRangeV"></span> m Sichtweite, die der Kegel auf der Karte darstellt.</span></label>
+
+      <label class="field"><span class="eyebrow">Kegel – Öffnungswinkel</span>
+        <input type="range" id="setFov" min="5" max="120" step="5">
+        <span class="hint"><span class="num" id="setFovV"></span>° Bildwinkel.</span></label>
+
+      <label class="field"><span class="eyebrow">Geoid-Undulation N</span>
+        <input type="number" id="setGeoid" step="0.1">
+        <span class="hint">Android liefert die Höhe über dem WGS84-Ellipsoid. Höhe ü. NN = GPS-Höhe − N.
+          In Deutschland liegt N bei etwa 45–48 m. Mit „Höhe abgleichen“ wird der Wert aus einem
+          Geländemodell für deinen Standort berechnet (braucht Netz).</span></label>
+      <div class="rowline"><div><div class="eyebrow">Höhenabgleich</div>
+          <div class="num" style="font-size:12px;color:var(--sand-dim)" id="calState">noch nicht abgeglichen</div></div>
+        <button class="btn" id="calBtn">Höhe abgleichen</button></div>
+
+      <label class="field"><span class="eyebrow">Kompass-Korrektur</span>
+        <input type="number" id="setDecl" step="0.1">
+        <span class="hint">Fester Zuschlag in Grad auf die gemessene Richtung. Nur nutzen, wenn du eine
+          bekannte Peilung gegenprüfen konntest.</span></label>
+
+      <div class="rowline"><div><div class="eyebrow">Speicher</div>
+        <div class="num" style="font-size:12px;color:var(--sand-dim)" id="quota">–</div></div>
+        <button class="btn" id="persist">Dauerhaft</button></div>
+
+      <div class="rowline"><div><div class="eyebrow">Archiv leeren</div>
+        <div style="font-size:12px;color:var(--sand-dim)">Löscht alle Fotos auf diesem Gerät.</div></div>
+        <button class="btn warn" id="wipe">Löschen</button></div>
+
+      <div style="padding:20px 14px 40px;color:var(--sand-dim);font-size:11px;line-height:1.7">
+        Feldblick speichert alles lokal auf dem Gerät. Es werden keine Fotos und keine Positionen
+        übertragen. Kartenkacheln kommen von OpenStreetMap und werden für die Offline-Nutzung
+        zwischengespeichert.
+      </div>
+    </div>
+  </section>
+</div>
+
+<nav>
+  <button data-v="v-cam" aria-selected="true"><svg viewBox="0 0 24 24"><path d="M3 8h4l2-3h6l2 3h4v11H3z"/><circle cx="12" cy="13" r="3.6"/></svg>Aufnahme</button>
+  <button data-v="v-map"><svg viewBox="0 0 24 24"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg>Karte</button>
+  <button data-v="v-list"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="1"/><path d="M3 10h18M9 10v10"/></svg>Archiv</button>
+  <button data-v="v-set"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>Setup</button>
+</nav>
+
+<div id="toast"></div>
+<div id="flash"></div>
+<div id="sheet"></div>
+
+<script src="vendor/leaflet.js"></script>
+<script>
+"use strict";
+const APP_VERSION = "1.0.0";
+
+/* =========================================================
+   Hilfsfunktionen
+   ========================================================= */
+const $ = s => document.querySelector(s);
+const D2R = Math.PI/180, R2D = 180/Math.PI, EARTH = 6371008.8;
+const pad = (n,l=2) => String(n).padStart(l,"0");
+let toastT;
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("on");
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("on"),2300); }
+
+function destPoint(lat,lon,brg,dist){
+  const d=dist/EARTH, b=brg*D2R, p1=lat*D2R, l1=lon*D2R;
+  const p2=Math.asin(Math.sin(p1)*Math.cos(d)+Math.cos(p1)*Math.sin(d)*Math.cos(b));
+  const l2=l1+Math.atan2(Math.sin(b)*Math.sin(d)*Math.cos(p1), Math.cos(d)-Math.sin(p1)*Math.sin(p2));
+  return [p2*R2D, ((l2*R2D+540)%360)-180];
+}
+const CARD = ["N","NNO","NO","ONO","O","OSO","SO","SSO","S","SSW","SW","WSW","W","WNW","NW","NNW"];
+const cardinal = d => CARD[Math.round(((d%360)+360)%360/22.5)%16];
+function fmtCoord(lat,lon){ return lat.toFixed(6)+"°, "+lon.toFixed(6)+"°"; }
+function stamp(ts){ const d=new Date(ts);
+  return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+" "+pad(d.getHours())+":"+pad(d.getMinutes()); }
+function fileStamp(ts){ const d=new Date(ts);
+  return ""+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+"-"+pad(d.getHours())+pad(d.getMinutes())+pad(d.getSeconds()); }
+
+/* =========================================================
+   Einstellungen
+   ========================================================= */
+const SET = Object.assign({ range:80, fov:40, geoid:46, decl:0 },
+  JSON.parse(localStorage.getItem("feldblick.set")||"{}"));
+const saveSet = () => localStorage.setItem("feldblick.set", JSON.stringify(SET));
+
+/* =========================================================
+   Datenbank (IndexedDB)
+   ========================================================= */
+const DB = (()=>{
+  let db;
+  function open(){ return new Promise((res,rej)=>{
+    if(db) return res(db);
+    const rq = indexedDB.open("feldblick",1);
+    rq.onupgradeneeded = e => { const d=e.target.result;
+      const s=d.createObjectStore("shots",{keyPath:"id"}); s.createIndex("ts","ts"); };
+    rq.onsuccess = e => { db=e.target.result; res(db); };
+    rq.onerror = () => rej(rq.error);
+  });}
+  const tx = (mode,fn) => open().then(d => new Promise((res,rej)=>{
+    const t=d.transaction("shots",mode), s=t.objectStore("shots"); let out;
+    out = fn(s); t.oncomplete=()=>res(out&&out.result!==undefined?out.result:out); t.onerror=()=>rej(t.error);
+  }));
+  return {
+    add: rec => tx("readwrite", s=>s.add(rec)),
+    all: () => tx("readonly", s=>s.index("ts").getAll()),
+    del: id => tx("readwrite", s=>s.delete(id)),
+    clear: () => tx("readwrite", s=>s.clear())
+  };
+})();
+
+/* =========================================================
+   Sensoren: Position + Richtung
+   ========================================================= */
+const S = { lat:null, lon:null, acc:null, altEll:null, altAcc:null, posTs:0,
+            heading:null, tilt:null, headOk:false, headTs:0 };
+
+let geoWatch=null;
+function startGeo(){
+  if(!navigator.geolocation){ $("#rPosS").textContent="Gerät ohne GPS"; return; }
+  if(geoWatch!==null) navigator.geolocation.clearWatch(geoWatch);
+  geoWatch = navigator.geolocation.watchPosition(p=>{
+    S.lat=p.coords.latitude; S.lon=p.coords.longitude; S.acc=p.coords.accuracy;
+    S.altEll=p.coords.altitude; S.altAcc=p.coords.altitudeAccuracy; S.posTs=Date.now();
+    paintReadout();
+  }, err=>{
+    $("#rPosS").textContent = err.code===1 ? "Zugriff verweigert" : "kein Signal";
+    $("#rPos").parentElement.classList.add("stale");
+  }, {enableHighAccuracy:true, maximumAge:1000, timeout:20000});
+}
+
+/* Richtung der Rückkamera aus der Geräte-Lage.
+   W3C-Rotationsmatrix R = Rz(alpha)·Rx(beta)·Ry(gamma), Kamera zeigt entlang der Geräte-(−z)-Achse. */
+function headingFrom(alpha,beta,gamma){
+  if(alpha==null||beta==null||gamma==null) return null;
+  const x=beta*D2R, y=gamma*D2R, z=alpha*D2R;
+  const cX=Math.cos(x),cY=Math.cos(y),cZ=Math.cos(z),sX=Math.sin(x),sY=Math.sin(y),sZ=Math.sin(z);
+  const r13 = cY*sZ*sX + cZ*sY, r23 = sZ*sY - cZ*cY*sX, r33 = cX*cY;   // Geräte-z-Achse in Weltkoordinaten
+  const r12 = -cX*sZ,          r22 = cZ*cX,             r32 = sX;      // Geräte-y-Achse (Oberkante)
+  let e=-r13, n=-r23;                       // Blickrichtung = −z
+  const up = -r33;                           // Vertikalanteil der Blickrichtung
+  if(Math.abs(up) > 0.985){ e = r12; n = r22; }   // fast senkrecht: Oberkante als Ersatz
+  const h = (Math.atan2(e,n)*R2D + 360) % 360;
+  return { heading:h, tilt:Math.asin(Math.max(-1,Math.min(1,up)))*R2D };
+}
+
+/* Zirkulärer gleitender Mittelwert gegen Kompasszittern */
+const buf=[];
+function pushHeading(h,tilt){
+  buf.push(h); if(buf.length>8) buf.shift();
+  let sx=0,sy=0; for(const a of buf){ sx+=Math.cos(a*D2R); sy+=Math.sin(a*D2R); }
+  S.heading = ((Math.atan2(sy,sx)*R2D + SET.decl)%360+360)%360;
+  S.tilt = tilt; S.headTs = Date.now(); S.headOk = true;
+  paintTape(); paintReadout();
+}
+
+function onOrient(e){
+  if(e.webkitCompassHeading != null && !isNaN(e.webkitCompassHeading)){
+    const r = headingFrom(360 - e.webkitCompassHeading, e.beta, e.gamma);
+    if(r) pushHeading(r.heading, r.tilt);
+    return;
+  }
+  if(e.absolute === false && !e.__forced) return;   // relative Daten sind für Peilung wertlos
+  const r = headingFrom(e.alpha, e.beta, e.gamma);
+  if(r) pushHeading(r.heading, r.tilt);
+}
+function startOrient(){
+  window.addEventListener("deviceorientationabsolute", onOrient, true);
+  window.addEventListener("deviceorientation", ev=>{ ev.__forced = (ev.absolute!==false); onOrient(ev); }, true);
+}
+
+async function askPermissions(){
+  try{
+    if(typeof DeviceOrientationEvent!=="undefined" && DeviceOrientationEvent.requestPermission){
+      await DeviceOrientationEvent.requestPermission();
+    }
+  }catch(e){}
+  startOrient(); startGeo();
+  setTimeout(paintSensState, 1200);
+  toast("Sensoren angefragt");
+}
+function paintSensState(){
+  const g = S.lat!=null ? "Position ✓" : "Position –";
+  const c = S.headOk ? "Kompass ✓" : "Kompass –";
+  $("#sensState").textContent = g+"   "+c;
+}
+
+/* =========================================================
+   Anzeige: Peilband + Messwerte
+   ========================================================= */
+const PXDEG = 5.2;
+(function buildTape(){
+  const inner=$("#tapeInner"), f=document.createDocumentFragment();
+  for(let d=-180; d<=540; d+=5){
+    const dd=((d%360)+360)%360, major = dd%45===0;
+    const t=document.createElement("div"); t.className="tick"+(major?" major":"");
+    t.style.left=(d*PXDEG)+"px"; f.appendChild(t);
+    if(major){ const l=document.createElement("div"); l.className="tlabel"+(dd%90===0?" card":"");
+      l.style.left=(d*PXDEG)+"px"; l.textContent=cardinal(dd); f.appendChild(l); }
+  }
+  inner.appendChild(f);
+})();
+function paintTape(){
+  if(S.heading==null) return;
+  $("#tapeInner").style.transform = "translateX("+(-S.heading*PXDEG)+"px)";
+  $("#tapeVal").textContent = Math.round(S.heading)+"°";
+}
+function altMsl(){ return S.altEll==null ? null : S.altEll - SET.geoid; }
+function paintReadout(){
+  const fresh = Date.now()-S.posTs < 12000;
+  $("#rPos").parentElement.classList.toggle("stale", !fresh);
+  if(S.lat!=null){
+    $("#rPos").textContent = S.lat.toFixed(5)+" / "+S.lon.toFixed(5);
+    $("#rPosS").textContent = "± "+Math.round(S.acc)+" m";
+  }
+  const a = altMsl();
+  $("#rAlt").textContent = a==null ? "–" : a.toFixed(1)+" m";
+  $("#rAltS").textContent = a==null ? "keine Höhe" : (S.altAcc!=null?"± "+Math.round(S.altAcc)+" m":"GPS")+" · N "+SET.geoid;
+  const hd = $("#rDir").parentElement;
+  hd.classList.toggle("stale", Date.now()-S.headTs > 4000);
+  $("#rDir").textContent = S.heading==null ? "–" : Math.round(S.heading)+"°";
+  $("#rDirS").textContent = S.heading==null ? "kein Kompass"
+    : cardinal(S.heading)+(S.tilt!=null?" · "+(S.tilt>0?"+":"")+S.tilt.toFixed(0)+"° Neigung":"");
+  $("#satN").textContent = S.acc!=null ? Math.round(S.acc) : "GPS";
+  $("#shutter").disabled = false;
+}
+setInterval(paintReadout, 2000);
+
+/* =========================================================
+   Kamera
+   ========================================================= */
+let stream=null;
+async function startCamera(){
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({
+      video:{ facingMode:{ideal:"environment"}, width:{ideal:2560}, height:{ideal:1440} }, audio:false });
+    $("#video").srcObject = stream; $("#noCam").style.display="none";
+  }catch(err){
+    $("#noCam").style.display="flex";
+    $("#noCamTxt").textContent = location.protocol==="https:"||location.hostname==="localhost"
+      ? "Kamerazugriff abgelehnt oder belegt. Erlaube ihn in den Website-Einstellungen und starte neu."
+      : "Die Kamera braucht HTTPS. Rufe die App über eine https-Adresse auf.";
+  }
+}
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible" && !stream) startCamera(); });
+
+async function capture(){
+  if(!stream){ startCamera(); return; }
+  const v=$("#video");
+  if(!v.videoWidth){ toast("Kamera noch nicht bereit"); return; }
+  $("#flash").style.opacity=".85"; setTimeout(()=>$("#flash").style.opacity="0",120);
+
+  const c=document.createElement("canvas"); c.width=v.videoWidth; c.height=v.videoHeight;
+  c.getContext("2d").drawImage(v,0,0);
+  const raw = await new Promise(r=>c.toBlob(r,"image/jpeg",.88));
+
+  const rec = { id:(crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random())),
+    ts:Date.now(), lat:S.lat, lon:S.lon, acc:S.acc,
+    altEll:S.altEll, altMsl:altMsl(), altAcc:S.altAcc, geoid:SET.geoid,
+    heading:S.heading, tilt:S.tilt, w:c.width, h:c.height, note:"" };
+
+  rec.blob = await withExif(raw, rec);
+  rec.thumb = await makeThumb(raw);
+  await DB.add(rec);
+  $("#lastthumb").src = URL.createObjectURL(rec.thumb);
+  addToMap(rec); refreshList();
+  toast(rec.lat==null ? "Foto ohne Position gespeichert"
+      : "Gespeichert · "+(rec.heading!=null?Math.round(rec.heading)+"°":"ohne Richtung"));
+}
+async function makeThumb(blob){
+  const bmp = await createImageBitmap(blob);
+  const s = 220/Math.max(bmp.width,bmp.height);
+  const c = document.createElement("canvas"); c.width=Math.round(bmp.width*s); c.height=Math.round(bmp.height*s);
+  c.getContext("2d").drawImage(bmp,0,0,c.width,c.height); bmp.close();
+  return new Promise(r=>c.toBlob(r,"image/jpeg",.72));
+}
+
+/* =========================================================
+   EXIF: GPS-Block in die JPEG-Datei schreiben
+   ========================================================= */
+async function withExif(blob, rec){
+  try{
+    if(rec.lat==null) return blob;
+    const app1 = buildExif(rec);
+    const buf = new Uint8Array(await blob.arrayBuffer());
+    if(!(buf[0]===0xFF && buf[1]===0xD8)) return blob;
+    const out = new Uint8Array(2 + app1.length + (buf.length-2));
+    out.set(buf.subarray(0,2),0); out.set(app1,2); out.set(buf.subarray(2), 2+app1.length);
+    return new Blob([out],{type:"image/jpeg"});
+  }catch(e){ return blob; }
+}
+function buildExif(rec){
+  const dms = v => { v=Math.abs(v); const d=Math.floor(v), m=Math.floor((v-d)*60), s=(v-d-m/60)*3600;
+    return [[d,1],[m,1],[Math.round(s*10000),10000]]; };
+  const dt = new Date(rec.ts);
+  const desc = (rec.note||"Feldblick") + "\0";
+
+  const gps = [];
+  gps.push([0x0000,1,4,[2,3,0,0]]);                                    // Version
+  gps.push([0x0001,2,2,(rec.lat>=0?"N":"S")+"\0"]);
+  gps.push([0x0002,5,3,dms(rec.lat)]);
+  gps.push([0x0003,2,2,(rec.lon>=0?"E":"W")+"\0"]);
+  gps.push([0x0004,5,3,dms(rec.lon)]);
+  if(rec.altMsl!=null){
+    gps.push([0x0005,1,1,[rec.altMsl<0?1:0]]);
+    gps.push([0x0006,5,1,[[Math.round(Math.abs(rec.altMsl)*100),100]]]);
+  }
+  gps.push([0x0007,5,3,[[dt.getUTCHours(),1],[dt.getUTCMinutes(),1],[dt.getUTCSeconds(),1]]]);
+  if(rec.heading!=null){
+    gps.push([0x0010,2,2,"T\0"]);
+    gps.push([0x0011,5,1,[[Math.round(rec.heading*100),100]]]);
+  }
+  gps.push([0x001D,2,11, dt.getUTCFullYear()+":"+pad(dt.getUTCMonth()+1)+":"+pad(dt.getUTCDate())+"\0"]);
+  gps.sort((a,b)=>a[0]-b[0]);
+
+  const ifd0 = [[0x010E,2,desc.length,desc],[0x8825,4,1,null]];        // Beschreibung + GPS-Zeiger
+
+  const size = (t,c) => ({1:1,2:1,3:2,4:4,5:8,7:1}[t]||1)*c;
+  const ifdBytes = n => 2 + n*12 + 4;
+  const ifd0At = 8, gpsAt = ifd0At + ifdBytes(ifd0.length);
+  let dataAt = gpsAt + ifdBytes(gps.length);
+  // Datenbereich für IFD0-Werte > 4 Byte
+  const plan = [];
+  let cursor = dataAt;
+  for(const e of ifd0){ if(e[3]!==null && size(e[1],e[2])>4){ plan.push([e,cursor]); cursor += size(e[1],e[2]); } }
+  for(const e of gps){ if(size(e[1],e[2])>4){ plan.push([e,cursor]); cursor += size(e[1],e[2]); } }
+  const tiffLen = cursor;
+
+  const tiff = new DataView(new ArrayBuffer(tiffLen));
+  const u8 = new Uint8Array(tiff.buffer);
+  const LE = true;
+  u8[0]=0x49; u8[1]=0x49; tiff.setUint16(2,42,LE); tiff.setUint32(4,ifd0At,LE);
+
+  const offOf = e => { const p = plan.find(p=>p[0]===e); return p?p[1]:null; };
+  function writeValue(e, at){
+    const [tag,type,count,val] = e;
+    const target = offOf(e); const base = target!=null ? target : at;
+    if(type===2){ for(let i=0;i<count;i++) u8[base+i] = val.charCodeAt(i)&0xFF; }
+    else if(type===1){ for(let i=0;i<count;i++) u8[base+i] = val[i]; }
+    else if(type===5){ for(let i=0;i<count;i++){ tiff.setUint32(base+i*8, val[i][0],LE); tiff.setUint32(base+i*8+4, val[i][1],LE); } }
+    else if(type===4){ tiff.setUint32(base, val[0],LE); }
+    if(target!=null) tiff.setUint32(at, target, LE);
+  }
+  function writeIfd(at, entries, nextOff){
+    tiff.setUint16(at, entries.length, LE);
+    entries.forEach((e,i)=>{
+      const p = at+2+i*12;
+      tiff.setUint16(p, e[0], LE); tiff.setUint16(p+2, e[1], LE); tiff.setUint32(p+4, e[2], LE);
+      if(e[0]===0x8825){ tiff.setUint32(p+8, gpsAt, LE); return; }
+      writeValue(e, p+8);
+    });
+    tiff.setUint32(at+2+entries.length*12, nextOff, LE);
+  }
+  writeIfd(ifd0At, ifd0, 0);
+  writeIfd(gpsAt, gps, 0);
+
+  const app1 = new Uint8Array(4 + 6 + tiffLen);
+  app1[0]=0xFF; app1[1]=0xE1;
+  app1[2]=((6+tiffLen+2)>>8)&0xFF; app1[3]=(6+tiffLen+2)&0xFF;
+  app1.set([0x45,0x78,0x69,0x66,0,0],4);
+  app1.set(u8,10);
+  return app1;
+}
+
+/* =========================================================
+   Karte
+   ========================================================= */
+let map, layerShots, meMarker;
+function initMap(){
+  map = L.map("map",{zoomControl:true, attributionControl:true}).setView([51.16,10.45],6);
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {maxZoom:19, attribution:"© OpenStreetMap"}).addTo(map);
+  layerShots = L.layerGroup().addTo(map);
+}
+function conePoly(rec){
+  const half = SET.fov/2, pts=[[rec.lat,rec.lon]];
+  for(let a=-half; a<=half; a+=Math.max(2,SET.fov/24)) pts.push(destPoint(rec.lat,rec.lon,rec.heading+a,SET.range));
+  pts.push(destPoint(rec.lat,rec.lon,rec.heading+half,SET.range));
+  return pts;
+}
+function addToMap(rec){
+  if(rec.lat==null || !map) return;
+  if(rec.heading!=null){
+    L.polygon(conePoly(rec),{color:"#FF6A2B",weight:1,opacity:.9,fillColor:"#FF6A2B",fillOpacity:.22})
+      .addTo(layerShots).on("click",()=>openShot(rec));
+  }
+  const m = L.marker([rec.lat,rec.lon],{icon:L.divIcon({className:"",html:'<div class="pin"></div>',iconSize:[14,14],iconAnchor:[7,7]})})
+    .addTo(layerShots);
+  m.bindPopup(popupHtml(rec),{maxWidth:230});
+  m.on("popupopen", e => {
+    const img = e.popup.getElement().querySelector("img");
+    if(img && rec.thumb) img.src = URL.createObjectURL(rec.thumb);
+  });
+}
+function popupHtml(rec){
+  const row=(k,v)=>'<div class="row"><span>'+k+'</span><b>'+v+'</b></div>';
+  return '<div class="pop"><img alt="Aufnahme">'
+    + row("Zeit", stamp(rec.ts))
+    + row("Position", rec.lat.toFixed(5)+", "+rec.lon.toFixed(5))
+    + row("Höhe ü. NN", rec.altMsl!=null?rec.altMsl.toFixed(1)+" m":"–")
+    + row("Richtung", rec.heading!=null?Math.round(rec.heading)+"° "+cardinal(rec.heading):"–")
+    + row("Genauigkeit", rec.acc!=null?"± "+Math.round(rec.acc)+" m":"–")
+    + "</div>";
+}
+async function redrawMap(){
+  if(!map) return;
+  layerShots.clearLayers();
+  const all = await DB.all(); all.forEach(addToMap);
+}
+async function fitAll(){
+  const all = (await DB.all()).filter(r=>r.lat!=null);
+  if(!all.length){ toast("Noch keine verorteten Fotos"); return; }
+  map.fitBounds(L.latLngBounds(all.map(r=>[r.lat,r.lon])).pad(.35));
+}
+
+/* Kartenausschnitt für Offline-Nutzung laden */
+async function cacheTiles(){
+  const b=map.getBounds(), z0=Math.round(map.getZoom());
+  const cache = await caches.open("feldblick-tiles");
+  const urls=[];
+  for(let z=z0; z<=Math.min(17,z0+2); z++){
+    const f = (lat,lon)=>[Math.floor((lon+180)/360*2**z),
+      Math.floor((1-Math.log(Math.tan(lat*D2R)+1/Math.cos(lat*D2R))/Math.PI)/2*2**z)];
+    const [x1,y1]=f(b.getNorth(),b.getWest()), [x2,y2]=f(b.getSouth(),b.getEast());
+    for(let x=x1;x<=x2;x++) for(let y=y1;y<=y2;y++)
+      urls.push("https://tile.openstreetmap.org/"+z+"/"+x+"/"+y+".png");
+  }
+  if(urls.length>900){ toast("Ausschnitt zu groß – näher heranzoomen"); return; }
+  toast(urls.length+" Kacheln werden geladen");
+  let ok=0;
+  for(let i=0;i<urls.length;i+=6){
+    await Promise.all(urls.slice(i,i+6).map(u=>
+      fetch(u,{mode:"no-cors"}).then(r=>cache.put(u,r)).then(()=>ok++).catch(()=>{})));
+  }
+  toast(ok+" Kacheln offline verfügbar");
+}
+
+/* =========================================================
+   Archiv
+   ========================================================= */
+async function refreshList(){
+  const all = (await DB.all()).sort((a,b)=>b.ts-a.ts);
+  $("#cnt").textContent = all.length ? "· "+all.length : "";
+  const body = $("#listBody");
+  if(!all.length){
+    body.innerHTML = '<div class="empty">'
+      + '<svg class="contour" viewBox="0 0 120 64" fill="none" stroke="#1D4650" stroke-width="1.5">'
+      + '<path d="M2 54c18-6 28-22 48-22s28 16 46 12"/><path d="M10 46c14-8 24-18 40-18s26 12 42 10"/>'
+      + '<path d="M22 38c10-6 18-12 28-12s20 8 32 8"/><path d="M36 31c6-4 10-7 15-7s12 5 19 5"/>'
+      + '<circle cx="56" cy="26" r="3" stroke="#FF6A2B"/></svg>'
+      + 'Noch keine Aufnahmen.<br>Wechsle zu <b>Aufnahme</b> und drücke den Auslöser.</div>';
+    return;
+  }
+  body.innerHTML="";
+  for(const r of all){
+    const el=document.createElement("div"); el.className="item";
+    el.innerHTML = '<img alt="">'
+      + '<div class="meta"><div class="t">'+stamp(r.ts)+'</div><div class="d">'
+      + (r.lat!=null ? fmtCoord(r.lat,r.lon) : "ohne Position")
+      + '<br><i>'+(r.altMsl!=null?r.altMsl.toFixed(1)+" m ü. NN":"– m")+'</i>'
+      + ' · <u>'+(r.heading!=null?Math.round(r.heading)+"° "+cardinal(r.heading):"– °")+'</u></div></div>'
+      + '<button class="btn" data-del="'+r.id+'">Löschen</button>';
+    if(r.thumb) el.querySelector("img").src = URL.createObjectURL(r.thumb);
+    el.querySelector("img").onclick = ()=>openShot(r);
+    el.querySelector("[data-del]").onclick = async ()=>{
+      await DB.del(r.id); refreshList(); redrawMap(); toast("Gelöscht"); };
+    body.appendChild(el);
+  }
+}
+function openShot(rec){
+  const sh=$("#sheet");
+  sh.innerHTML = '<div class="head"><h2>Aufnahme</h2><button class="btn" id="shClose">Schließen</button></div>'
+    + '<div class="scroll"><img style="width:100%;display:block" alt="">'
+    + '<div style="padding:14px">'
+    + kv("Zeit", stamp(rec.ts))
+    + kv("Position", rec.lat!=null?fmtCoord(rec.lat,rec.lon):"–")
+    + kv("Lagegenauigkeit", rec.acc!=null?"± "+Math.round(rec.acc)+" m":"–")
+    + kv("Höhe ü. NN", rec.altMsl!=null?rec.altMsl.toFixed(1)+" m":"–")
+    + kv("GPS-Höhe (Ellipsoid)", rec.altEll!=null?rec.altEll.toFixed(1)+" m · N "+rec.geoid:"–")
+    + kv("Richtung", rec.heading!=null?rec.heading.toFixed(1)+"° "+cardinal(rec.heading):"–")
+    + kv("Neigung", rec.tilt!=null?rec.tilt.toFixed(0)+"°":"–")
+    + '<div style="display:flex;gap:8px;margin-top:16px">'
+    + '<button class="btn go" id="shSave">Foto sichern</button>'
+    + '<button class="btn" id="shMap">Auf Karte</button></div></div></div>';
+  sh.classList.add("on");
+  sh.querySelector("img").src = URL.createObjectURL(rec.blob);
+  $("#shClose").onclick = ()=>sh.classList.remove("on");
+  $("#shSave").onclick = ()=>download(rec.blob, shotName(rec));
+  $("#shMap").onclick = ()=>{ sh.classList.remove("on"); show("v-map");
+    if(rec.lat!=null) map.setView([rec.lat,rec.lon],17); };
+}
+const kv=(k,v)=>'<div class="row" style="display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid var(--ink-2)">'
+  +'<span class="eyebrow">'+k+'</span><span class="num" style="font-size:13px">'+v+'</span></div>';
+const shotName = r => "feldblick_"+fileStamp(r.ts)
+  + (r.lat!=null ? "_"+r.lat.toFixed(5)+"_"+r.lon.toFixed(5) : "")
+  + (r.heading!=null ? "_"+Math.round(r.heading)+"deg" : "") + ".jpg";
+
+function download(blob,name){
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),8000);
+}
+
+/* =========================================================
+   Export: GeoJSON, CSV, ZIP
+   ========================================================= */
+async function buildGeoJSON(){
+  const all = (await DB.all()).filter(r=>r.lat!=null);
+  return { type:"FeatureCollection", features: all.flatMap(r=>{
+    const props = { datei:shotName(r), zeit:new Date(r.ts).toISOString(),
+      hoehe_ueber_nn_m:r.altMsl, gps_hoehe_ellipsoid_m:r.altEll, geoid_n_m:r.geoid,
+      lagegenauigkeit_m:r.acc, richtung_grad:r.heading, neigung_grad:r.tilt };
+    const f = [{ type:"Feature", geometry:{type:"Point",coordinates:[r.lon,r.lat, r.altMsl??0]},
+      properties:Object.assign({typ:"standpunkt"},props) }];
+    if(r.heading!=null) f.push({ type:"Feature",
+      geometry:{type:"Polygon",coordinates:[conePoly(r).map(p=>[p[1],p[0]]).concat([[r.lon,r.lat]])]},
+      properties:Object.assign({typ:"blickfeld",reichweite_m:SET.range,oeffnung_grad:SET.fov},props) });
+    return f;
+  })};
+}
+async function buildCSV(){
+  const all = (await DB.all());
+  const head = "datei;zeit;breite;laenge;hoehe_ueber_nn_m;gps_hoehe_ellipsoid_m;geoid_n_m;lagegenauigkeit_m;richtung_grad;neigung_grad";
+  const rows = all.map(r=>[shotName(r), new Date(r.ts).toISOString(), r.lat??"", r.lon??"",
+    r.altMsl?.toFixed(2)??"", r.altEll?.toFixed(2)??"", r.geoid, r.acc?.toFixed(1)??"",
+    r.heading?.toFixed(1)??"", r.tilt?.toFixed(1)??""].join(";"));
+  return "\ufeff"+[head,...rows].join("\r\n");
+}
+/* Minimaler ZIP-Schreiber, Methode "gespeichert" (JPEG ist bereits komprimiert) */
+const CRCT=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;
+  for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0;}return t;})();
+function crc32(u8){let c=0xFFFFFFFF;for(let i=0;i<u8.length;i++)c=CRCT[(c^u8[i])&0xFF]^(c>>>8);return (c^0xFFFFFFFF)>>>0;}
+function dosTime(d){return ((d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()/2))&0xFFFF;}
+function dosDate(d){return (((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate())&0xFFFF;}
+async function makeZip(files){
+  const parts=[], central=[]; let offset=0;
+  for(const f of files){
+    const name=new TextEncoder().encode(f.name);
+    const data=new Uint8Array(await f.blob.arrayBuffer());
+    const crc=crc32(data), d=f.date||new Date();
+    const lh=new DataView(new ArrayBuffer(30)); const lu=new Uint8Array(lh.buffer);
+    lh.setUint32(0,0x04034b50,true); lh.setUint16(4,20,true); lh.setUint16(6,0x0800,true);
+    lh.setUint16(8,0,true); lh.setUint16(10,dosTime(d),true); lh.setUint16(12,dosDate(d),true);
+    lh.setUint32(14,crc,true); lh.setUint32(18,data.length,true); lh.setUint32(22,data.length,true);
+    lh.setUint16(26,name.length,true); lh.setUint16(28,0,true);
+    parts.push(lu,name,data);
+    const ch=new DataView(new ArrayBuffer(46)); const cu=new Uint8Array(ch.buffer);
+    ch.setUint32(0,0x02014b50,true); ch.setUint16(4,20,true); ch.setUint16(6,20,true);
+    ch.setUint16(8,0x0800,true); ch.setUint16(10,0,true); ch.setUint16(12,dosTime(d),true);
+    ch.setUint16(14,dosDate(d),true); ch.setUint32(16,crc,true);
+    ch.setUint32(20,data.length,true); ch.setUint32(24,data.length,true);
+    ch.setUint16(28,name.length,true); ch.setUint32(42,offset,true);
+    central.push(cu,name);
+    offset += 30+name.length+data.length;
+  }
+  const cStart=offset; let cSize=0; central.forEach(p=>cSize+=p.length);
+  const end=new DataView(new ArrayBuffer(22)); 
+  end.setUint32(0,0x06054b50,true); end.setUint16(8,files.length,true); end.setUint16(10,files.length,true);
+  end.setUint32(12,cSize,true); end.setUint32(16,cStart,true);
+  return new Blob([...parts,...central,new Uint8Array(end.buffer)],{type:"application/zip"});
+}
+async function exportZip(){
+  const all = await DB.all();
+  if(!all.length){ toast("Nichts zu exportieren"); return; }
+  toast("Export wird gepackt …");
+  const files = all.map(r=>({name:"fotos/"+shotName(r), blob:r.blob, date:new Date(r.ts)}));
+  files.push({name:"punkte.geojson", blob:new Blob([JSON.stringify(await buildGeoJSON(),null,1)])});
+  files.push({name:"punkte.csv", blob:new Blob([await buildCSV()])});
+  download(await makeZip(files), "feldblick_"+fileStamp(Date.now())+".zip");
+}
+
+/* =========================================================
+   Höhenabgleich über ein Geländemodell (nur online)
+   ========================================================= */
+async function calibrate(){
+  if(S.lat==null || S.altEll==null){ toast("Warte auf GPS-Höhe"); return; }
+  $("#calState").textContent = "wird abgefragt …";
+  try{
+    const r = await fetch("https://api.open-meteo.com/v1/elevation?latitude="+S.lat+"&longitude="+S.lon);
+    const j = await r.json();
+    const dem = j.elevation[0];                       // Geländehöhe über NN aus dem Höhenmodell
+    SET.geoid = +(S.altEll - dem - 1.5).toFixed(1);   // 1,5 m Handhöhe über Grund
+    saveSet(); $("#setGeoid").value = SET.geoid;
+    $("#calState").textContent = "Gelände "+dem.toFixed(0)+" m ü. NN · N = "+SET.geoid;
+    paintReadout(); toast("Höhe abgeglichen");
+  }catch(e){ $("#calState").textContent = "keine Verbindung zum Höhenmodell"; }
+}
+
+/* =========================================================
+   Bedienung
+   ========================================================= */
+function show(id){
+  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("on", v.id===id));
+  document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected", b.dataset.v===id));
+  if(id==="v-map"){ if(!map){ initMap(); redrawMap(); } setTimeout(()=>map.invalidateSize(),60);
+    if(S.lat!=null && !meMarker){ meMarker=L.circleMarker([S.lat,S.lon],{radius:5,color:"#5FB2D6"}).addTo(map);} }
+  if(id==="v-list") refreshList();
+  if(id==="v-set") paintSensState();
+}
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>show(b.dataset.v));
+$("#shutter").onclick = capture;
+$("#startCam").onclick = ()=>{ startCamera(); askPermissions(); };
+$("#toGps").onclick = askPermissions;
+$("#askPerm").onclick = askPermissions;
+$("#fitAll").onclick = fitAll;
+$("#cacheTiles").onclick = cacheTiles;
+$("#calBtn").onclick = calibrate;
+$("#expZip").onclick = exportZip;
+$("#expGeo").onclick = async ()=>download(new Blob([JSON.stringify(await buildGeoJSON(),null,1)],
+  {type:"application/geo+json"}), "feldblick_"+fileStamp(Date.now())+".geojson");
+$("#wipe").onclick = async ()=>{ if(confirm("Wirklich alle Aufnahmen auf diesem Gerät löschen?")){
+  await DB.clear(); refreshList(); redrawMap(); toast("Archiv geleert"); } };
+$("#persist").onclick = async ()=>{
+  if(navigator.storage?.persist){ const ok = await navigator.storage.persist();
+    toast(ok?"Speicher ist geschützt":"Gerät hat abgelehnt"); paintQuota(); } };
+async function paintQuota(){
+  if(!navigator.storage?.estimate) return;
+  const e = await navigator.storage.estimate();
+  $("#quota").textContent = (e.usage/1048576).toFixed(1)+" MB belegt von "+(e.quota/1073741824).toFixed(1)+" GB";
+}
+
+/* Einstellungsfelder */
+function bindSettings(){
+  $("#ver").textContent = "v"+APP_VERSION;
+  const rng=$("#setRange"), fov=$("#setFov");
+  rng.value=SET.range; fov.value=SET.fov; $("#setGeoid").value=SET.geoid; $("#setDecl").value=SET.decl;
+  $("#setRangeV").textContent=SET.range; $("#setFovV").textContent=SET.fov;
+  rng.oninput = ()=>{ SET.range=+rng.value; $("#setRangeV").textContent=SET.range; saveSet(); };
+  rng.onchange = redrawMap;
+  fov.oninput = ()=>{ SET.fov=+fov.value; $("#setFovV").textContent=SET.fov; saveSet(); };
+  fov.onchange = redrawMap;
+  $("#setGeoid").onchange = e=>{ SET.geoid=+e.target.value||0; saveSet(); paintReadout(); };
+  $("#setDecl").onchange = e=>{ SET.decl=+e.target.value||0; saveSet(); };
+}
+
+/* Start */
+bindSettings(); paintQuota(); refreshList();
+startOrient(); startGeo(); startCamera();
+DB.all().then(a=>{ if(a.length){ const last=a[a.length-1]; if(last.thumb) $("#lastthumb").src=URL.createObjectURL(last.thumb); }});
+if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>
