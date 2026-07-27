@@ -5,9 +5,7 @@ const TILES = "feldblick-tiles";
 
 const FILES = [
   "./", "./index.html", "./manifest.webmanifest",
-  "./vendor/leaflet.js", "./vendor/leaflet.css",
-  "./vendor/images/marker-icon.png", "./vendor/images/marker-shadow.png",
-  "./icon-192.png", "./icon-512.png"
+  "./icon-192.png", "./icon-512.png", "./icon-512-maskable.png"
 ];
 
 self.addEventListener("install", e => {
