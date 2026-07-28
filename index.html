@@ -887,7 +887,8 @@ label.field .hint{display:block;margin-top:7px;font-size:11px;color:var(--sand-d
         <div class="num" style="font-size:12px;color:var(--sand-dim)" id="syncState">–</div></div>
         <div style="display:flex;gap:8px;flex-direction:column">
           <button class="btn" id="syncNow" data-i18n="sSyncNow"></button>
-          <button class="btn" id="testNow" data-i18n="sTest"></button></div></div>
+          <button class="btn" id="testNow" data-i18n="sTest"></button>
+          <button class="btn" id="cfgNow" data-i18n="sConfig"></button></div></div>
 
       <label class="field"><span class="eyebrow" data-i18n="sRange"></span>
         <input type="range" id="setRange" min="10" max="2000" step="10">
@@ -938,6 +939,7 @@ label.field .hint{display:block;margin-top:7px;font-size:11px;color:var(--sand-d
 
 <div id="toast"></div><div id="flash"></div><div id="sheet"></div>
 
+<script src="config.js"></script>
 <script>/* Leaflet 1.9.4, BSD-2 */
 /* @preserve
  * Leaflet 1.9.4, a JS library for interactive maps. https://leafletjs.com
@@ -952,18 +954,22 @@ label.field .hint{display:block;margin-top:7px;font-size:11px;color:var(--sand-d
 /* =========================================================
    SERVER – enter here (see SERVER-EINRICHTEN.md)
    ========================================================= */
+// Bevorzugt aus config.js (eine kleine Datei neben index.html).
+// Ersatzweise können die Werte auch hier direkt eingetragen werden.
+const CFG = (typeof window !== "undefined" && window.ASPECT_CONFIG) ? window.ASPECT_CONFIG : {};
 const CLOUD_DEFAULT = {
-  url: "",   // e.g. https://abcdefghijkl.supabase.co
-  key: ""    // the public anon key
+  url: CFG.url || "",   // e.g. https://abcdefghijkl.supabase.co
+  key: CFG.key || ""    // the public anon key
 };
 
-const APP_VERSION = "3.6.0";
+const APP_VERSION = "3.8.0";
 
 /* =========================================================
    Sprachen
    ========================================================= */
 const I18N = {
 de:{
+ sConfig:"config.js",
  sTest:"Test",
  updSearch:"Suche nach Update …",
  libBad:"{0} nicht lesbar",
@@ -1021,6 +1027,7 @@ de:{
  hPrivacy:"Aufnahmen liegen immer zuerst auf dem Gerät. Geteilte Beiträge sind für alle sichtbar, die diese App nutzen – ohne Anmeldung, ohne Prüfung. Lade nichts hoch, das Personen zeigt. Kartenkacheln von OpenStreetMap."
 },
 en:{
+ sConfig:"config.js",
  sTest:"Test",
  updSearch:"Checking for update …",
  libBad:"{0} unreadable",
@@ -1078,6 +1085,7 @@ en:{
  hPrivacy:"Photos always stay on the device first. Shared reports are visible to everyone using this app – no account, no moderation. Don't upload anything showing people. Map tiles by OpenStreetMap."
 },
 fr:{
+ sConfig:"config.js",
  sTest:"Test",
  updSearch:"Recherche de mise à jour …",
  libBad:"{0} illisibles",
@@ -1135,6 +1143,7 @@ fr:{
  hPrivacy:"Les photos restent d'abord sur l'appareil. Les observations partagées sont visibles par tous les utilisateurs – sans compte ni modération. Ne publiez rien montrant des personnes. Fonds de carte OpenStreetMap."
 },
 it:{
+ sConfig:"config.js",
  sTest:"Test",
  updSearch:"Ricerca aggiornamento …",
  libBad:"{0} non leggibili",
@@ -1192,6 +1201,7 @@ it:{
  hPrivacy:"Le foto restano prima di tutto sul dispositivo. Le segnalazioni condivise sono visibili a chiunque usi l'app – senza registrazione né moderazione. Non caricare immagini con persone. Mappe di OpenStreetMap."
 },
 es:{
+ sConfig:"config.js",
  sTest:"Test",
  updSearch:"Buscando actualización …",
  libBad:"{0} ilegibles",
@@ -1293,6 +1303,12 @@ const SET = Object.assign(
 if(CLOUD_DEFAULT.url) SET.cloudUrl = CLOUD_DEFAULT.url;
 if(CLOUD_DEFAULT.key) SET.cloudKey = CLOUD_DEFAULT.key;
 const saveSet = () => localStorage.setItem("aspect.set", JSON.stringify(SET));
+// Altlasten aufräumen: eine früher eingetippte Adresse mit Pfad oder Schrägstrich
+// wird einmalig auf die reine Projektadresse gekürzt.
+(function(){
+  const sauber = cloudBase();
+  if(sauber && sauber !== SET.cloudUrl){ SET.cloudUrl = sauber; saveSet(); }
+})();
 
 let LANG = "en", RTF = null;
 function pickLang(){
@@ -1737,7 +1753,7 @@ const Cloud = {
   },
   url(path){ return cloudBase()+"/storage/v1/object/public/fotos/"+path; }
 };
-let pushing=false, lastError="";
+let pushing=false, lastError="", fehlVersuche=0, naechsterVersuch=0;
 
 async function testCloud(){
   const b = cloudBase(), zeilen = [];
@@ -1777,8 +1793,11 @@ function zeigeTest(zeilen){
   sh.classList.add("on");
   $("#tClose").onclick = () => sh.classList.remove("on");
 }
-async function pushPending(){
+async function pushPending(sofort){
   if(pushing||!cloudReady()||!navigator.onLine) return;
+  // Nach einem Fehlschlag nicht sofort wieder anklopfen, sondern warten.
+  // Der Knopf in den Einstellungen uebergeht die Wartezeit.
+  if(!sofort && Date.now() < naechsterVersuch) return;
   pushing=true;
   try{
     const todo=(await DB.all("shots")).filter(r=>r.sync===1);
@@ -1792,8 +1811,15 @@ async function pushPending(){
           heading:rec.heading, tilt:rec.tilt, kategorie:rec.kategorie, notiz:rec.notiz,
           autor:rec.autor||null, geheim:rec.geheim, foto:name });
         rec.sync=2; await DB.put("shots",rec);
-      }catch(e){ lastError=String(e.message||e); console.warn("push",e);
-        toast(T("serverFail")+" · "+lastError); break; }
+        fehlVersuche=0; naechsterVersuch=0; lastError="";
+      }catch(e){
+        lastError=String(e.message||e); console.warn("push",e);
+        fehlVersuche++;
+        // 15 s, 30 s, 1 min, 2 min, 4 min, 8 min, danach hoechstens 10 min
+        naechsterVersuch = Date.now() + Math.min(15000 * 2**(fehlVersuche-1), 600000);
+        toast(T("serverFail")+" · "+lastError);
+        break;
+      }
     }
   } finally { pushing=false; paintSyncState(); refreshList(); }
 }
@@ -1819,7 +1845,11 @@ async function paintSyncState(){
       + (lastError ? "\n⚠ " + lastError : "");
   $("#syncState").style.whiteSpace = "pre-line";
 }
-window.addEventListener("online", pushPending);
+window.addEventListener("online", ()=>pushPending(true));
+document.addEventListener("visibilitychange", ()=>{
+  if(document.visibilityState==="visible") pushPending();
+});
+setInterval(()=>pushPending(), 20000);
 
 /* =========================================================
    Karte
@@ -2121,8 +2151,18 @@ $("#fitAll").onclick=fitAll;
 $("#pullNow").onclick=pullRemote;
 $("#cacheTiles").onclick=cacheTiles;
 $("#calBtn").onclick=calibrate;
-$("#syncNow").onclick=()=>{pushPending();pullRemote();};
+$("#syncNow").onclick=()=>{ fehlVersuche=0; naechsterVersuch=0; pushPending(true); pullRemote(); };
 $("#testNow").onclick=testCloud;
+$("#cfgNow").onclick=()=>{
+  const b=cloudBase(), k=SET.cloudKey||"";
+  if(!b || !k){ toast(T("noServer")); return; }
+  const txt='/* Aspect Conditions – Zugangsdaten. Neben index.html ablegen. */\n'
+    +'window.ASPECT_CONFIG = {\n'
+    +'  url: "'+b.replace(/["\\]/g,"")+'",\n'
+    +'  key: "'+k.replace(/["\\]/g,"")+'"\n};\n';
+  download(new Blob([txt],{type:"application/javascript"}),"config.js");
+  toast("config.js");
+};
 $("#expZip").onclick=exportZip;
 $("#libBtn").onclick=()=>$("#libInput").click();
 $("#libInput").onchange=async e=>{

@@ -1,5 +1,5 @@
 /* Aspect Conditions – Service Worker */
-const SHELL = "aspect-shell-v9";
+const SHELL = "aspect-shell-v11";
 const TILES = "aspect-tiles";
 const MEDIA = "aspect-media";
 
@@ -41,6 +41,15 @@ self.addEventListener("fetch", e => {
 
   // Datenbank und Höhenmodell immer frisch holen
   if (url.pathname.startsWith("/rest/v1/") || url.hostname.includes("open-meteo.com")) return;
+
+  // Zugangsdaten: erst Netz, nur ersatzweise der Zwischenspeicher.
+  // Sonst liefe die App nach einer Änderung noch mit den alten Werten.
+  if (url.pathname.endsWith("/config.js")) {
+    e.respondWith(fetch(e.request)
+      .then(res => { if (res.ok) caches.open(SHELL).then(c => c.put(e.request, res.clone())); return res; })
+      .catch(() => caches.match(e.request).then(hit => hit || new Response("", {status: 504}))));
+    return;
+  }
 
   // App-Hülle
   e.respondWith(caches.open(SHELL).then(async cache => {
