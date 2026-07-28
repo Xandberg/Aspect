@@ -1,6 +1,7 @@
 -- =====================================================================
---  Hangblick – Einrichtung der gemeinsamen Datenbank
+--  Aspect Conditions – Einrichtung der gemeinsamen Datenbank
 --  Supabase → SQL Editor → alles einfügen → Run
+--  Danach zur Kontrolle PRUEFEN.sql ausführen.
 -- =====================================================================
 
 -- ---------- Tabelle ----------
@@ -57,23 +58,6 @@ create policy "schreiben" on public.sichtungen for insert to anon with check (tr
 
 -- Kein update, kein delete: ohne Policy geht beides nicht.
 
--- ---------- Löschen nur mit passendem Geheimnis ----------
-create or replace function public.sichtung_loeschen(p_id uuid, p_geheim text)
-returns boolean
-language plpgsql
-security definer
-set search_path = public
-as $$
-declare n int;
-begin
-  delete from public.sichtungen where id = p_id and geheim = p_geheim;
-  get diagnostics n = row_count;
-  return n > 0;
-end $$;
-
-revoke all on function public.sichtung_loeschen(uuid, text) from public;
-grant execute on function public.sichtung_loeschen(uuid, text) to anon;
-
 -- ---------- Speicher für die Fotos ----------
 insert into storage.buckets (id, name, public)
 values ('fotos', 'fotos', true)
@@ -105,49 +89,47 @@ create policy "fotos hochladen" on storage.objects
 --   delete from sichtungen where ts < now() - interval '1 year';
 
 -- =====================================================================
---  Aufräumen: alte Beiträge automatisch entfernen
---  Einmal ausführen, dann läuft es von selbst.
--- =====================================================================
-create extension if not exists pg_cron;
 
--- Jeden Montag um 03:00 UTC alles löschen, was älter als ein Jahr ist.
--- Zeitraum nach Bedarf ändern: '6 months', '2 years', …
-select cron.schedule(
-  'aspect-aufraeumen',
-  '0 3 * * 1',
-  $$ delete from public.sichtungen where ts < now() - interval '1 year' $$
-);
+-- ---------- Funktionen (eindeutige Begrenzer, damit der Editor nicht stolpert) ----------
 
--- Auftrag wieder entfernen:  select cron.unschedule('aspect-aufraeumen');
--- Laufende Aufträge ansehen:  select * from cron.job;
+-- Löschen nur mit passendem Geheimnis
+create or replace function public.sichtung_loeschen(p_id uuid, p_geheim text)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $fn_del$
+declare n int;
+begin
+  delete from public.sichtungen where id = p_id and geheim = p_geheim;
+  get diagnostics n = row_count;
+  return n > 0;
+end
+$fn_del$;
 
--- Achtung: die Bilddateien im Storage bleiben dabei liegen. Sie sind über die
--- App nicht mehr auffindbar, belegen aber weiter Platz. Zum echten Freiräumen
--- unter Supabase → Storage → fotos → nach Datum sortieren und löschen.
--- =====================================================================
---  Nachtrag zu SERVER-EINRICHTEN.sql
---  Nötig, damit Bedingung und Notiz auch nach dem Teilen noch
---  geändert werden können. Einmal im SQL Editor ausführen.
---  Ohne diesen Schritt läuft alles andere weiter; Änderungen an
---  bereits geteilten Beiträgen bleiben dann nur lokal.
--- =====================================================================
-
+-- Bedingung und Notiz nachträglich ändern, ebenfalls nur mit Geheimnis
 create or replace function public.sichtung_aendern(
   p_id uuid, p_geheim text, p_kategorie text, p_notiz text)
 returns boolean
 language plpgsql
 security definer
 set search_path = public
-as $$
+as $fn_upd$
 declare n int;
 begin
   update public.sichtungen
-     set kategorie = coalesce(nullif(p_kategorie,''), kategorie),
-         notiz     = left(coalesce(p_notiz,''), 400)
+     set kategorie = coalesce(nullif(p_kategorie, ''), kategorie),
+         notiz     = left(coalesce(p_notiz, ''), 400)
    where id = p_id and geheim = p_geheim;
   get diagnostics n = row_count;
   return n > 0;
-end $$;
+end
+$fn_upd$;
 
-revoke all on function public.sichtung_aendern(uuid, text, text, text) from public;
+grant execute on function public.sichtung_loeschen(uuid, text) to anon;
 grant execute on function public.sichtung_aendern(uuid, text, text, text) to anon;
+
+-- =====================================================================
+--  Fertig.  Kontrolle: PRUEFEN.sql
+--  Automatisches Aufräumen: AUFRAEUMEN-OPTIONAL.sql, separat ausführen.
+-- =====================================================================

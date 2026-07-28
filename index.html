@@ -957,7 +957,7 @@ const CLOUD_DEFAULT = {
   key: ""    // the public anon key
 };
 
-const APP_VERSION = "3.5.0";
+const APP_VERSION = "3.6.0";
 
 /* =========================================================
    Sprachen
@@ -1003,7 +1003,7 @@ de:{
  setTitle:"Einstellungen",sLang:"Sprache",sLangAuto:"Wie das Handy",sSensors:"Sensoren",sGrant:"Freigeben",
  sShare:"Beiträge teilen",shareOn:"Neue Aufnahmen werden beim Sichern sofort gesendet.",
  shareOff:"Neue Aufnahmen bleiben auf dem Gerät.",shareNoSrv:"Kein Server eingetragen – die App läuft rein lokal.",
- sName:"Name",hName:"Optional. Steht bei geteilten Aufnahmen dabei, wenn du es beim Sichern auswählst. Nimm keinen Klarnamen.",
+ sName:"Name",hName:"Optional. Erscheint bei geteilten Aufnahmen, sofern darunter dein Name gewählt ist. Nimm keinen Klarnamen.",
  sSync:"Abgleich",sSyncNow:"Jetzt senden",syncLine:"{0} geteilt · {1} offen · {2} fremde",
  sRange:"Kegel – Reichweite",hRange:"{0} m Sichtweite des Kegels auf der Karte.",
  sFov:"Kegel – Öffnungswinkel",hFov:"{0}° Bildwinkel.",
@@ -1060,7 +1060,7 @@ en:{
  setTitle:"Settings",sLang:"Language",sLangAuto:"Match phone",sSensors:"Sensors",sGrant:"Grant",
  sShare:"Share reports",shareOn:"New photos are sent as soon as they are saved.",
  shareOff:"New photos stay on the device.",shareNoSrv:"No server configured – the app runs entirely offline.",
- sName:"Name",hName:"Optional. Shown on shared reports if you pick it when saving. Don't use your real name.",
+ sName:"Name",hName:"Optional. Shown on shared reports if the choice below is set to your name. Don't use your real name.",
  sSync:"Sync",sSyncNow:"Send now",syncLine:"{0} shared · {1} pending · {2} from others",
  sRange:"Cone – range",hRange:"{0} m of sight distance drawn on the map.",
  sFov:"Cone – field of view",hFov:"{0}° angle of view.",
@@ -1117,7 +1117,7 @@ fr:{
  setTitle:"Réglages",sLang:"Langue",sLangAuto:"Comme le téléphone",sSensors:"Capteurs",sGrant:"Autoriser",
  sShare:"Partager les observations",shareOn:"Les nouvelles photos partent dès leur enregistrement.",
  shareOff:"Les photos restent sur l'appareil.",shareNoSrv:"Aucun serveur – l'application reste locale.",
- sName:"Nom",hName:"Facultatif. Affiché sur les observations partagées si vous le choisissez. N'utilisez pas votre vrai nom.",
+ sName:"Nom",hName:"Facultatif. Apparaît sur les observations partagées si le choix ci-dessous indique votre nom. N'utilisez pas votre vrai nom.",
  sSync:"Synchronisation",sSyncNow:"Envoyer",syncLine:"{0} partagées · {1} en attente · {2} d'autrui",
  sRange:"Cône – portée",hRange:"{0} m de portée dessinée sur la carte.",
  sFov:"Cône – ouverture",hFov:"{0}° de champ.",
@@ -1174,7 +1174,7 @@ it:{
  setTitle:"Impostazioni",sLang:"Lingua",sLangAuto:"Come il telefono",sSensors:"Sensori",sGrant:"Consenti",
  sShare:"Condividi segnalazioni",shareOn:"Le nuove foto vengono inviate subito al salvataggio.",
  shareOff:"Le foto restano sul dispositivo.",shareNoSrv:"Nessun server – l'app funziona solo in locale.",
- sName:"Nome",hName:"Facoltativo. Compare sulle segnalazioni condivise se lo scegli al salvataggio. Non usare il nome reale.",
+ sName:"Nome",hName:"Facoltativo. Compare sulle segnalazioni condivise se sotto è selezionato il tuo nome. Non usare il nome reale.",
  sSync:"Sincronizzazione",sSyncNow:"Invia ora",syncLine:"{0} condivise · {1} in attesa · {2} altrui",
  sRange:"Cono – portata",hRange:"{0} m di portata disegnati sulla mappa.",
  sFov:"Cono – apertura",hFov:"{0}° di campo visivo.",
@@ -1231,7 +1231,7 @@ es:{
  setTitle:"Ajustes",sLang:"Idioma",sLangAuto:"Como el teléfono",sSensors:"Sensores",sGrant:"Permitir",
  sShare:"Compartir avisos",shareOn:"Las fotos nuevas se envían al guardarlas.",
  shareOff:"Las fotos se quedan en el dispositivo.",shareNoSrv:"Sin servidor – la app funciona solo en local.",
- sName:"Nombre",hName:"Opcional. Aparece en los avisos compartidos si lo eliges al guardar. No uses tu nombre real.",
+ sName:"Nombre",hName:"Opcional. Aparece en los avisos compartidos si abajo está seleccionado tu nombre. No uses tu nombre real.",
  sSync:"Sincronización",sSyncNow:"Enviar ahora",syncLine:"{0} compartidos · {1} pendientes · {2} de otros",
  sRange:"Cono – alcance",hRange:"{0} m de alcance dibujados en el mapa.",
  sFov:"Cono – apertura",hFov:"{0}° de campo visual.",
@@ -1760,7 +1760,9 @@ async function testCloud(){
   await probe("2  Tabelle sichtungen", b + "/rest/v1/sichtungen?select=id&limit=1");
   await probe("3  Speicher fotos", b + "/storage/v1/object/public/fotos/__test.jpg");
   zeilen.push("Erwartet:");
-  zeilen.push("1 → 200");
+  zeilen.push("1 → 200 oder 401, beides in Ordnung.");
+  zeilen.push("   401 heißt nur: dieser Pfad verlangt einen");
+  zeilen.push("   geheimen Schlüssel. Der Server antwortet.");
   zeilen.push("2 → 200 mit [] oder Einträgen");
   zeilen.push("3 → 400/404 mit \"Object not found\"");
   zeilen.push("   Steht dort \"Bucket not found\", fehlt der Speicher-Eimer.");
