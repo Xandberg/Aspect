@@ -858,14 +858,6 @@ label.field .hint{display:block;margin-top:7px;font-size:11px;color:var(--sand-d
     <div class="head"><h2 data-i18n="setTitle"></h2><span class="eyebrow" id="ver"></span></div>
     <div class="scroll">
 
-      <label class="field"><span class="eyebrow" data-i18n="sLang"></span>
-        <select id="setLang">
-          <option value="auto"></option>
-          <option value="de">Deutsch</option><option value="en">English</option>
-          <option value="fr">Français</option><option value="it">Italiano</option>
-          <option value="es">Español</option>
-        </select></label>
-
       <div class="rowline"><div><div class="eyebrow" data-i18n="sSensors"></div>
         <div class="num" style="font-size:12px;color:var(--sand-dim)" id="sensState">–</div></div>
         <button class="btn go" id="askPerm" data-i18n="sGrant"></button></div>
@@ -885,47 +877,50 @@ label.field .hint{display:block;margin-top:7px;font-size:11px;color:var(--sand-d
           <button class="chip" data-w="anon" data-i18n="shAnon"></button>
         </div></div>
 
-      <div class="rowline"><div><div class="eyebrow" data-i18n="sSync"></div>
-        <div class="num" style="font-size:12px;color:var(--sand-dim)" id="syncState">–</div></div>
-        <div style="display:flex;gap:8px;flex-direction:column">
-          <button class="btn" id="syncNow" data-i18n="sSyncNow"></button>
-          <button class="btn" id="testNow" data-i18n="sTest"></button>
-          <button class="btn" id="cfgNow" data-i18n="sConfig"></button></div></div>
+      <div class="rowline"><div style="flex:1"><div class="eyebrow" data-i18n="sSync"></div>
+        <div class="num" style="font-size:12px;color:var(--sand-dim)" id="syncState">–</div></div></div>
 
       <label class="field"><span class="eyebrow" data-i18n="sRange"></span>
-        <input type="range" id="setRange" min="10" max="2000" step="10">
+        <input type="range" id="setRange" min="0" max="4000" step="50">
         <span class="hint" id="hRange"></span></label>
 
       <label class="field"><span class="eyebrow" data-i18n="sFov"></span>
-        <input type="range" id="setFov" min="5" max="120" step="5">
+        <input type="range" id="setFov" min="0" max="180" step="5">
         <span class="hint" id="hFov"></span></label>
 
-      <label class="field"><span class="eyebrow" data-i18n="sGeoid"></span>
-        <input type="number" id="setGeoid" step="0.1">
-        <span class="hint" id="hGeoid"></span></label>
-      <div class="rowline"><div><div class="eyebrow" data-i18n="sCalib"></div>
-        <div class="num" style="font-size:12px;color:var(--sand-dim)" id="calState"></div></div>
-        <button class="btn" id="calBtn" data-i18n="sCalibBtn"></button></div>
-
-      <label class="field"><span class="eyebrow" data-i18n="sDecl"></span>
-        <input type="number" id="setDecl" step="0.1">
-        <span class="hint" id="hDecl"></span></label>
-
-      <div class="rowline"><div><div class="eyebrow" data-i18n="sStorage"></div>
-        <div class="num" style="font-size:12px;color:var(--sand-dim)" id="quota">–</div></div>
-        <button class="btn" id="persist" data-i18n="sPersist"></button></div>
       <div class="rowline"><div><div class="eyebrow" data-i18n="sWipe"></div>
         <div class="sub" data-i18n="sWipeHint"></div></div>
         <button class="btn warn" id="wipe" data-i18n="sWipeBtn"></button></div>
 
-      <details style="padding:14px;border-top:1px solid var(--ink-3)">
-        <summary class="eyebrow" style="cursor:pointer" data-i18n="sServer"></summary>
-        <label class="field" style="border:0;padding:12px 0 0"><span class="eyebrow" data-i18n="sAddr"></span>
+      <div id="advanced" style="display:none">
+        <div class="eyebrow" style="padding:20px 14px 2px;color:var(--relief)" data-i18n="sAdvanced"></div>
+
+        <div class="rowline"><div><div class="eyebrow" data-i18n="sStorage"></div>
+          <div class="num" style="font-size:12px;color:var(--sand-dim)" id="quota">–</div></div></div>
+
+        <label class="field"><span class="eyebrow" data-i18n="sGeoid"></span>
+          <input type="number" id="setGeoid" step="0.1">
+          <span class="hint" id="hGeoid"></span></label>
+        <div class="rowline"><div><div class="eyebrow" data-i18n="sCalib"></div>
+          <div class="num" style="font-size:12px;color:var(--sand-dim)" id="calState"></div></div>
+          <button class="btn" id="calBtn" data-i18n="sCalibBtn"></button></div>
+
+        <label class="field"><span class="eyebrow" data-i18n="sDecl"></span>
+          <input type="number" id="setDecl" step="0.1">
+          <span class="hint" id="hDecl"></span></label>
+
+        <div class="rowline"><div><div class="eyebrow" data-i18n="sServer"></div>
+          <div class="sub" id="hServer"></div></div>
+          <div style="display:flex;gap:8px;flex-direction:column">
+            <button class="btn" id="syncNow" data-i18n="sSyncNow"></button>
+            <button class="btn" id="testNow" data-i18n="sTest"></button>
+            <button class="btn" id="cfgNow" data-i18n="sConfig"></button></div></div>
+
+        <label class="field"><span class="eyebrow" data-i18n="sAddr"></span>
           <input type="text" id="setUrl" placeholder="https://xxxx.supabase.co"></label>
-        <label class="field" style="border:0;padding:12px 0 0"><span class="eyebrow" data-i18n="sKey"></span>
-          <input type="text" id="setKey" placeholder="eyJ..."></label>
-        <div class="hint" id="hServer" style="font-size:11px;color:var(--sand-dim);line-height:1.5;margin-top:9px"></div>
-      </details>
+        <label class="field"><span class="eyebrow" data-i18n="sKey"></span>
+          <input type="text" id="setKey" placeholder="sb_publishable_..."></label>
+      </div>
 
       <div id="hPrivacy" style="padding:18px 14px 40px;color:var(--sand-dim);font-size:11px;line-height:1.7"></div>
     </div>
@@ -964,13 +959,17 @@ const CLOUD_DEFAULT = {
   key: CFG.key || ""    // the public anon key
 };
 
-const APP_VERSION = "3.10.0";
+const APP_VERSION = "4.0.0";
 
 /* =========================================================
    Sprachen
    ========================================================= */
 const I18N = {
 de:{
+ sAdvanced:"Erweitert",
+ dPlace:"Ort setzen",
+ pickHint:"Auf die Karte tippen, um den Standpunkt zu setzen.",
+ placeSaved:"Ort gesetzt",
  camDeniedIos:"Safari merkt sich eine einmal abgelehnte Freigabe. Tippe links in der Adresszeile auf ᴀA, dann Website-Einstellungen, dann Kamera auf Fragen stellen.",
  camDeniedAndroid:"Chrome merkt sich eine einmal abgelehnte Freigabe. Tippe links in der Adresszeile auf das Schloss, dann Berechtigungen, dort die Kamera zurücksetzen.",
  camBusy:"Die Kamera wird gerade von einer anderen App benutzt. Schließe sie und versuche es erneut.",
@@ -1034,6 +1033,10 @@ de:{
  hPrivacy:"Aufnahmen liegen immer zuerst auf dem Gerät. Geteilte Beiträge sind für alle sichtbar, die diese App nutzen – ohne Anmeldung, ohne Prüfung. Lade nichts hoch, das Personen zeigt. Kartenkacheln von OpenStreetMap."
 },
 en:{
+ sAdvanced:"Advanced",
+ dPlace:"Set location",
+ pickHint:"Tap the map to set the viewpoint.",
+ placeSaved:"Location set",
  camDeniedIos:"Safari remembers a denied permission. Tap ᴀA on the left of the address bar, then Website Settings, then set Camera to Ask.",
  camDeniedAndroid:"Chrome remembers a denied permission. Tap the lock icon on the left of the address bar, then Permissions, then reset Camera.",
  camBusy:"The camera is in use by another app. Close it and try again.",
@@ -1097,6 +1100,10 @@ en:{
  hPrivacy:"Photos always stay on the device first. Shared reports are visible to everyone using this app – no account, no moderation. Don't upload anything showing people. Map tiles by OpenStreetMap."
 },
 fr:{
+ sAdvanced:"Avancé",
+ dPlace:"Définir le lieu",
+ pickHint:"Touchez la carte pour placer le point de vue.",
+ placeSaved:"Lieu défini",
  camDeniedIos:"Safari retient un refus. Touchez ᴀA à gauche de la barre d'adresse, puis Réglages du site, puis mettez Caméra sur Demander.",
  camDeniedAndroid:"Chrome retient un refus. Touchez le cadenas à gauche de la barre d'adresse, puis Autorisations, puis réinitialisez la caméra.",
  camBusy:"La caméra est utilisée par une autre application. Fermez-la et réessayez.",
@@ -1160,6 +1167,10 @@ fr:{
  hPrivacy:"Les photos restent d'abord sur l'appareil. Les observations partagées sont visibles par tous les utilisateurs – sans compte ni modération. Ne publiez rien montrant des personnes. Fonds de carte OpenStreetMap."
 },
 it:{
+ sAdvanced:"Avanzate",
+ dPlace:"Imposta luogo",
+ pickHint:"Tocca la mappa per fissare il punto di ripresa.",
+ placeSaved:"Luogo impostato",
  camDeniedIos:"Safari ricorda un rifiuto. Tocca ᴀA a sinistra nella barra degli indirizzi, poi Impostazioni sito, quindi imposta Fotocamera su Chiedi.",
  camDeniedAndroid:"Chrome ricorda un rifiuto. Tocca il lucchetto a sinistra nella barra degli indirizzi, poi Autorizzazioni, quindi reimposta la fotocamera.",
  camBusy:"La fotocamera è usata da un'altra app. Chiudila e riprova.",
@@ -1223,6 +1234,10 @@ it:{
  hPrivacy:"Le foto restano prima di tutto sul dispositivo. Le segnalazioni condivise sono visibili a chiunque usi l'app – senza registrazione né moderazione. Non caricare immagini con persone. Mappe di OpenStreetMap."
 },
 es:{
+ sAdvanced:"Avanzado",
+ dPlace:"Fijar lugar",
+ pickHint:"Toca el mapa para situar el punto de vista.",
+ placeSaved:"Lugar fijado",
  camDeniedIos:"Safari recuerda un permiso denegado. Toca ᴀA a la izquierda de la barra de direcciones, luego Ajustes del sitio, y pon Cámara en Preguntar.",
  camDeniedAndroid:"Chrome recuerda un permiso denegado. Toca el candado a la izquierda de la barra de direcciones, luego Permisos, y restablece la cámara.",
  camBusy:"Otra aplicación está usando la cámara. Ciérrala e inténtalo de nuevo.",
@@ -1324,7 +1339,7 @@ const uid = () => crypto.randomUUID ? crypto.randomUUID()
    ========================================================= */
 const OLD = localStorage.getItem("hangblick.set") || localStorage.getItem("feldblick.set");
 const SET = Object.assign(
-  { range:400, fov:40, geoid:48, decl:0, share:false, autor:"", postAs:"anon", tIdx:2, onlyMine:false,
+  { range:2000, fov:65, geoid:48, decl:0, share:false, autor:"", postAs:"anon", tIdx:2, onlyMine:false,
     lang:"auto", cloudUrl:CLOUD_DEFAULT.url, cloudKey:CLOUD_DEFAULT.key },
   JSON.parse(localStorage.getItem("aspect.set") || OLD || "{}"));
 if(CLOUD_DEFAULT.url) SET.cloudUrl = CLOUD_DEFAULT.url;
@@ -1335,11 +1350,13 @@ const saveSet = () => localStorage.setItem("aspect.set", JSON.stringify(SET));
 (function(){
   const sauber = cloudBase();
   if(sauber && sauber !== SET.cloudUrl){ SET.cloudUrl = sauber; saveSet(); }
+  // Kegelvorgaben einmalig auf den neuen Stand bringen
+  if(SET.kegelStand !== 2){ SET.range = 2000; SET.fov = 65; SET.kegelStand = 2; saveSet(); }
 })();
 
 let LANG = "en", RTF = null;
 function pickLang(){
-  if(SET.lang && SET.lang!=="auto" && I18N[SET.lang]) return SET.lang;
+  // Immer der Spracheinstellung des Geraets folgen, ersatzweise Englisch.
   for(const c of (navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language||"en"])){
     const l=String(c).slice(0,2).toLowerCase();
     if(I18N[l]) return l;
@@ -1360,7 +1377,6 @@ function setLang(){
     const v=T(el.dataset.i18n);
     if(/<[a-z]/i.test(v)) el.innerHTML=v; else el.textContent=v;
   });
-  $("#setLang").options[0].textContent = T("sLangAuto");
 }
 function ago(ts){
   const min=(Date.now()-ts)/60000;
@@ -1407,6 +1423,12 @@ function startGeo(){
   geoWatch=navigator.geolocation.watchPosition(p=>{
     S.lat=p.coords.latitude; S.lon=p.coords.longitude; S.acc=p.coords.accuracy;
     S.altEll=p.coords.altitude; S.altAcc=p.coords.altitudeAccuracy; S.posTs=Date.now(); paintReadout();
+    // Einmalig automatisch abgleichen, sobald der Empfang gut genug ist.
+    // Ohne das rechnet ein iPhone rund 47 m zu tief, weil es die Hoehe schon ueber
+    // Meeresspiegel liefert und die App sie ein zweites Mal korrigieren wuerde.
+    if(!SET.geoidAuto && S.altEll!=null && S.acc!=null && S.acc<30 && navigator.onLine){
+      SET.geoidAuto=true; saveSet(); calibrate(true);
+    }
   }, err=>{ $("#rPosS").textContent = err.code===1?T("denied"):T("noSignal"); },
   {enableHighAccuracy:true,maximumAge:1000,timeout:20000});
 }
@@ -1441,8 +1463,12 @@ async function askPermissions(){
     await DeviceOrientationEvent.requestPermission(); }catch(e){}
   startOrient(); startGeo(); setTimeout(paintSensState,1200); toast(T("sensorsAsked"));
 }
-const paintSensState = () =>
+function paintSensState(){
+  const ok = (S.lat!=null) && S.headOk;
   $("#sensState").textContent = (S.lat!=null?T("posOk"):T("posNo"))+"   "+(S.headOk?T("compOk"):T("compNo"));
+  $("#askPerm").style.display = ok ? "none" : "";   // nur zeigen, wenn wirklich etwas fehlt
+}
+setInterval(()=>{ if($("#v-set").classList.contains("on")) paintSensState(); }, 3000);
 
 /* =========================================================
    Anzeige
@@ -2063,7 +2089,8 @@ function openShot(rec){
     +'<div style="display:flex;gap:8px;margin-top:16px">'
     +'<button class="btn go" id="shSave">'+T("dSave")+'</button>'
     +(rec.sync===0&&cloudReady()?'<button class="btn" id="shShare">'+T("dShare")+'</button>':'')
-    +'<button class="btn" id="shMap">'+T("dToMap")+'</button></div>'
+    +'<button class="btn" id="shMap">'+T("dToMap")+'</button>'
+    +'<button class="btn" id="shPlace">'+T("dPlace")+'</button></div>'
     +'<div style="margin-top:24px;border-top:1px solid var(--ink-3);padding-top:16px">'
     +'<div class="eyebrow" style="margin-bottom:9px">'+T("dEdit")+'</div>'
     +'<div class="chips" id="eKats">'
@@ -2094,7 +2121,66 @@ function openShot(rec){
     await DB.put("shots",rec); sh.classList.remove("on"); refreshList(); toast(T("sending")); pushPending(); };
   $("#shMap").onclick=()=>{ sh.classList.remove("on"); show("v-map");
     if(rec.lat!=null) map.setView([rec.lat,rec.lon],15); };
+  $("#shPlace").onclick=()=>openPlacePicker(rec);
 }
+let pickMap=null;
+function openPlacePicker(rec){
+  const sh=$("#sheet");
+  sh.innerHTML='<div class="head"><h2>'+T("dPlace")+'</h2>'
+    +'<button class="btn" id="pClose">'+T("dClose")+'</button></div>'
+    +'<div id="pickMap" style="flex:1;min-height:38vh"></div>'
+    +'<div style="padding:12px 14px 18px;border-top:1px solid var(--ink-3)">'
+    +'<div class="eyebrow" id="pInfo" style="margin-bottom:10px">'+T("pickHint")+'</div>'
+    +'<div class="eyebrow" style="margin-bottom:6px">'+T("dDir")+' <span class="num" id="pDirV"'
+    +' style="color:var(--bearing)">'+(rec.heading!=null?Math.round(rec.heading):0)+'°</span></div>'
+    +'<input type="range" id="pDir" min="0" max="359" step="1" value="'
+    +(rec.heading!=null?Math.round(rec.heading):0)+'">'
+    +'<button class="btn go" id="pSave" style="width:100%;margin-top:14px">'+T("shSave")+'</button>'
+    +'</div>';
+  sh.classList.add("on");
+
+  let lat = rec.lat, lon = rec.lon;
+  let dir = rec.heading!=null ? Math.round(rec.heading) : 0;
+  const start = (lat!=null) ? [lat,lon] : (S.lat!=null ? [S.lat,S.lon] : [47.0,11.0]);
+
+  pickMap = L.map("pickMap",{zoomControl:true}).setView(start, lat!=null||S.lat!=null ? 15 : 7);
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {maxZoom:19,attribution:"© OpenStreetMap"}).addTo(pickMap);
+  let marke=null, kegel=null;
+  const zeichne=()=>{
+    if(lat==null) return;
+    if(marke) pickMap.removeLayer(marke);
+    if(kegel) pickMap.removeLayer(kegel);
+    kegel=L.polygon(conePoly(lat,lon,dir),
+      {color:"#FF6A2B",weight:1,opacity:.9,fillColor:"#FF6A2B",fillOpacity:.25}).addTo(pickMap);
+    marke=L.marker([lat,lon],{icon:L.divIcon({className:"",
+      html:'<div class="pin"></div>',iconSize:[14,14],iconAnchor:[7,7]})}).addTo(pickMap);
+    $("#pInfo").textContent = lat.toFixed(5)+" / "+lon.toFixed(5);
+  };
+  zeichne();
+  setTimeout(()=>pickMap.invalidateSize(),60);
+  pickMap.on("click", e => { lat=e.latlng.lat; lon=e.latlng.lng; zeichne(); });
+  $("#pDir").oninput = e => { dir=+e.target.value; $("#pDirV").textContent=dir+"°"; zeichne(); };
+
+  const schliessen=()=>{ if(pickMap){ pickMap.remove(); pickMap=null; } sh.classList.remove("on"); };
+  $("#pClose").onclick = schliessen;
+  $("#pSave").onclick = async () => {
+    if(lat==null){ toast(T("pickHint")); return; }
+    rec.lat=lat; rec.lon=lon; rec.heading=dir; rec.acc=null; rec.gesetzt=true;
+    if(rec.altMsl==null && navigator.onLine){
+      try{
+        const j=await (await fetch("https://api.open-meteo.com/v1/elevation?latitude="
+          +lat+"&longitude="+lon)).json();
+        rec.altMsl=j.elevation[0]; rec.geoid=0;
+      }catch(e){}
+    }
+    if(SET.share && cloudReady() && rec.sync===0) rec.sync=1;
+    await DB.put("shots",rec);
+    schliessen(); refreshList(); renderMap();
+    toast(T("placeSaved")); pushPending(true);
+  };
+}
+
 function openRemote(r){
   const sh=$("#sheet");
   sh.innerHTML='<div class="head"><h2>'+T("dPostBy", r.autor?esc(r.autor):T("dAnon"))+'</h2>'
@@ -2179,8 +2265,8 @@ async function exportZip(){
    Höhenabgleich
    ========================================================= */
 let calibrated=false;
-async function calibrate(){
-  if(S.lat==null||S.altEll==null){ toast(T("calibWait")); return; }
+async function calibrate(still){
+  if(S.lat==null||S.altEll==null){ if(!still) toast(T("calibWait")); return; }
   $("#calState").textContent=T("sCalibAsk");
   try{
     const j=await (await fetch("https://api.open-meteo.com/v1/elevation?latitude="+S.lat+"&longitude="+S.lon)).json();
@@ -2188,7 +2274,7 @@ async function calibrate(){
     SET.geoid=+(S.altEll-dem-1.5).toFixed(1); saveSet(); $("#setGeoid").value=SET.geoid;
     calibrated=true; SET.calibDem=dem; saveSet();
     $("#calState").textContent=T("sCalibDone",dem.toFixed(0),SET.geoid);
-    paintReadout(); toast(T("calibOk"));
+    paintReadout(); if(!still) toast(T("calibOk"));
   }catch(e){ $("#calState").textContent=T("sCalibFail"); }
 }
 
@@ -2241,8 +2327,11 @@ $("#libInput").onchange=async e=>{
 };
 $("#wipe").onclick=async()=>{ if(confirm(T("sWipeAsk"))){
   await DB.clear("shots"); await DB.clear("fremde"); refreshList(); renderMap(); toast(T("wiped")); }};
-$("#persist").onclick=async()=>{ if(navigator.storage?.persist){
-  toast(await navigator.storage.persist()?T("persistOk"):T("persistNo")); paintQuota(); }};
+// Dauerhaften Speicher still anfordern, statt einen Knopf dafuer anzubieten
+(async()=>{ try{
+  if(navigator.storage?.persisted && navigator.storage?.persist
+     && !(await navigator.storage.persisted())) await navigator.storage.persist();
+}catch(e){} })();
 async function paintQuota(){
   if(!navigator.storage?.estimate) return;
   const e=await navigator.storage.estimate();
@@ -2274,7 +2363,6 @@ function bindSettings(){
   const rng=$("#setRange"),fov=$("#setFov");
   rng.value=SET.range; fov.value=SET.fov; $("#setGeoid").value=SET.geoid; $("#setDecl").value=SET.decl;
   $("#setAutor").value=SET.autor; $("#setUrl").value=SET.cloudUrl; $("#setKey").value=SET.cloudKey;
-  $("#setLang").value=SET.lang;
   rng.oninput=()=>{SET.range=+rng.value;$("#hRange").textContent=T("hRange",SET.range);saveSet();};
   rng.onchange=renderMap;
   fov.oninput=()=>{SET.fov=+fov.value;$("#hFov").textContent=T("hFov",SET.fov);saveSet();};
@@ -2288,7 +2376,6 @@ function bindSettings(){
     SET.postAs=b.dataset.w; saveSet(); paintPostAs(); };
   $("#setUrl").onchange=e=>{SET.cloudUrl=e.target.value.trim().replace(/\/$/,"");saveSet();paintShare();};
   $("#setKey").onchange=e=>{SET.cloudKey=e.target.value.trim();saveSet();paintShare();};
-  $("#setLang").onchange=e=>{ SET.lang=e.target.value; saveSet(); applyLanguage(); };
   $("#swShare").onclick=()=>{
     if(!cloudReady()){ toast(T("noServer")); return; }
     SET.share=!SET.share; saveSet(); paintShare(); };
@@ -2307,11 +2394,7 @@ function paintShare(){
   $("#swShare").setAttribute("aria-checked",SET.share);
   $("#shareHint").textContent = !cloudReady() ? T("shareNoSrv") : SET.share ? T("shareOn") : T("shareOff");
 }
-function applyLanguage(){
-  setLang(); buildTape(); paintTime(); paintHints(); paintShare(); paintPostAs();
-  paintReadout(); paintSensState(); paintSyncState(); paintQuota();
-  refreshList(); renderMap();
-}
+
 
 /* Start */
 if(SET.calibDem!=null) calibrated=true;
@@ -2337,8 +2420,21 @@ if("serviceWorker" in navigator){
   }).catch(()=>{});
 }
 // Tippen auf die Versionsnummer sucht von Hand nach einer neuen Fassung
-$("#ver").onclick = () => { toast(T("updSearch"));
-  if(swReg) swReg.update().catch(()=>{}); };
+let verTipps=0, verZeit=0;
+$("#ver").onclick = () => {
+  const jetzt=Date.now();
+  verTipps = (jetzt - verZeit < 1500) ? verTipps+1 : 1;
+  verZeit = jetzt;
+  if(verTipps>=5){
+    verTipps=0;
+    const an = $("#advanced").style.display==="none";
+    $("#advanced").style.display = an ? "block" : "none";
+    toast("Erweitert " + (an ? "an" : "aus"));
+    return;
+  }
+  toast(T("updSearch"));
+  if(swReg) swReg.update().catch(()=>{});
+};
 $("#ver").style.cursor = "pointer";
 </script>
 </body>
