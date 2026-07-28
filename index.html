@@ -951,17 +951,18 @@ label.field .hint{display:block;margin-top:7px;font-size:11px;color:var(--sand-d
    SERVER – enter here (see SERVER-EINRICHTEN.md)
    ========================================================= */
 const CLOUD_DEFAULT = {
-  url: "https://etcrmxepcaqplpmyzrwd.supabase.co/rest/v1/",   // e.g. https://abcdefghijkl.supabase.co
-  key: "sb_publishable_NOyomxg2jCJqLJYNMPlZOQ_bY9KZPWF"    // the public anon key
+  url: "",   // e.g. https://abcdefghijkl.supabase.co
+  key: ""    // the public anon key
 };
 
-const APP_VERSION = "3.1.0";
+const APP_VERSION = "3.3.0";
 
 /* =========================================================
    Sprachen
    ========================================================= */
 const I18N = {
 de:{
+ libBad:"{0} nicht lesbar",
  libBtn:"Bibliothek",libBusy:"Wird gelesen …",libDone:"{0} übernommen · {1} ohne Position",
  libNone:"Keine Bilder gelesen",savedShared:"Gespeichert & gesendet",dEdit:"Bedingung & Notiz",
  srcLib:"importiert",editSaved:"Übernommen",editRemoteFail:"Nur lokal geändert – Server nicht erreichbar",
@@ -996,7 +997,7 @@ de:{
  dSave:"Foto sichern",dShare:"Teilen",dToMap:"Auf Karte",dBy:"Von",dMe:"mir",dAnon:"anonym",
  dPostBy:"Beitrag von {0}",dView:"Ansehen",dTaken:"Aufgenommen",
  setTitle:"Einstellungen",sLang:"Sprache",sLangAuto:"Wie das Handy",sSensors:"Sensoren",sGrant:"Freigeben",
- sShare:"Beiträge teilen",shareOn:"Neue Aufnahmen werden beim Sichern zum Teilen vorgeschlagen.",
+ sShare:"Beiträge teilen",shareOn:"Neue Aufnahmen werden beim Sichern sofort gesendet.",
  shareOff:"Neue Aufnahmen bleiben auf dem Gerät.",shareNoSrv:"Kein Server eingetragen – die App läuft rein lokal.",
  sName:"Name",hName:"Optional. Steht bei geteilten Aufnahmen dabei, wenn du es beim Sichern auswählst. Nimm keinen Klarnamen.",
  sSync:"Abgleich",sSyncNow:"Jetzt senden",syncLine:"{0} geteilt · {1} offen · {2} fremde",
@@ -1016,6 +1017,7 @@ de:{
  hPrivacy:"Aufnahmen liegen immer zuerst auf dem Gerät. Geteilte Beiträge sind für alle sichtbar, die diese App nutzen – ohne Anmeldung, ohne Prüfung. Lade nichts hoch, das Personen zeigt. Kartenkacheln von OpenStreetMap."
 },
 en:{
+ libBad:"{0} unreadable",
  libBtn:"Library",libBusy:"Reading …",libDone:"{0} imported · {1} without position",
  libNone:"No images read",savedShared:"Saved & sent",dEdit:"Conditions & note",
  srcLib:"imported",editSaved:"Updated",editRemoteFail:"Changed locally only – server unreachable",
@@ -1050,7 +1052,7 @@ en:{
  dSave:"Save photo",dShare:"Share",dToMap:"On map",dBy:"By",dMe:"me",dAnon:"anonymous",
  dPostBy:"Report by {0}",dView:"View",dTaken:"Taken",
  setTitle:"Settings",sLang:"Language",sLangAuto:"Match phone",sSensors:"Sensors",sGrant:"Grant",
- sShare:"Share reports",shareOn:"New photos will offer sharing when you save them.",
+ sShare:"Share reports",shareOn:"New photos are sent as soon as they are saved.",
  shareOff:"New photos stay on the device.",shareNoSrv:"No server configured – the app runs entirely offline.",
  sName:"Name",hName:"Optional. Shown on shared reports if you pick it when saving. Don't use your real name.",
  sSync:"Sync",sSyncNow:"Send now",syncLine:"{0} shared · {1} pending · {2} from others",
@@ -1070,6 +1072,7 @@ en:{
  hPrivacy:"Photos always stay on the device first. Shared reports are visible to everyone using this app – no account, no moderation. Don't upload anything showing people. Map tiles by OpenStreetMap."
 },
 fr:{
+ libBad:"{0} illisibles",
  libBtn:"Galerie",libBusy:"Lecture …",libDone:"{0} importées · {1} sans position",
  libNone:"Aucune image lue",savedShared:"Enregistré et envoyé",dEdit:"Conditions & note",
  srcLib:"importée",editSaved:"Mis à jour",editRemoteFail:"Modifié en local seulement – serveur injoignable",
@@ -1104,7 +1107,7 @@ fr:{
  dSave:"Enregistrer la photo",dShare:"Partager",dToMap:"Sur la carte",dBy:"Par",dMe:"moi",dAnon:"anonyme",
  dPostBy:"Observation de {0}",dView:"Voir",dTaken:"Prise",
  setTitle:"Réglages",sLang:"Langue",sLangAuto:"Comme le téléphone",sSensors:"Capteurs",sGrant:"Autoriser",
- sShare:"Partager les observations",shareOn:"Le partage sera proposé à l'enregistrement.",
+ sShare:"Partager les observations",shareOn:"Les nouvelles photos partent dès leur enregistrement.",
  shareOff:"Les photos restent sur l'appareil.",shareNoSrv:"Aucun serveur – l'application reste locale.",
  sName:"Nom",hName:"Facultatif. Affiché sur les observations partagées si vous le choisissez. N'utilisez pas votre vrai nom.",
  sSync:"Synchronisation",sSyncNow:"Envoyer",syncLine:"{0} partagées · {1} en attente · {2} d'autrui",
@@ -1124,6 +1127,7 @@ fr:{
  hPrivacy:"Les photos restent d'abord sur l'appareil. Les observations partagées sont visibles par tous les utilisateurs – sans compte ni modération. Ne publiez rien montrant des personnes. Fonds de carte OpenStreetMap."
 },
 it:{
+ libBad:"{0} non leggibili",
  libBtn:"Galleria",libBusy:"Lettura …",libDone:"{0} importate · {1} senza posizione",
  libNone:"Nessuna immagine letta",savedShared:"Salvato e inviato",dEdit:"Condizioni e nota",
  srcLib:"importata",editSaved:"Aggiornato",editRemoteFail:"Modificato solo in locale – server irraggiungibile",
@@ -1158,7 +1162,7 @@ it:{
  dSave:"Salva foto",dShare:"Condividi",dToMap:"Sulla mappa",dBy:"Di",dMe:"me",dAnon:"anonimo",
  dPostBy:"Segnalazione di {0}",dView:"Apri",dTaken:"Scattata",
  setTitle:"Impostazioni",sLang:"Lingua",sLangAuto:"Come il telefono",sSensors:"Sensori",sGrant:"Consenti",
- sShare:"Condividi segnalazioni",shareOn:"Al salvataggio verrà proposta la condivisione.",
+ sShare:"Condividi segnalazioni",shareOn:"Le nuove foto vengono inviate subito al salvataggio.",
  shareOff:"Le foto restano sul dispositivo.",shareNoSrv:"Nessun server – l'app funziona solo in locale.",
  sName:"Nome",hName:"Facoltativo. Compare sulle segnalazioni condivise se lo scegli al salvataggio. Non usare il nome reale.",
  sSync:"Sincronizzazione",sSyncNow:"Invia ora",syncLine:"{0} condivise · {1} in attesa · {2} altrui",
@@ -1178,6 +1182,7 @@ it:{
  hPrivacy:"Le foto restano prima di tutto sul dispositivo. Le segnalazioni condivise sono visibili a chiunque usi l'app – senza registrazione né moderazione. Non caricare immagini con persone. Mappe di OpenStreetMap."
 },
 es:{
+ libBad:"{0} ilegibles",
  libBtn:"Galería",libBusy:"Leyendo …",libDone:"{0} importadas · {1} sin posición",
  libNone:"No se leyó ninguna imagen",savedShared:"Guardado y enviado",dEdit:"Condiciones y nota",
  srcLib:"importada",editSaved:"Actualizado",editRemoteFail:"Cambiado solo en local – servidor inaccesible",
@@ -1212,7 +1217,7 @@ es:{
  dSave:"Guardar foto",dShare:"Compartir",dToMap:"En el mapa",dBy:"De",dMe:"mí",dAnon:"anónimo",
  dPostBy:"Aviso de {0}",dView:"Ver",dTaken:"Tomada",
  setTitle:"Ajustes",sLang:"Idioma",sLangAuto:"Como el teléfono",sSensors:"Sensores",sGrant:"Permitir",
- sShare:"Compartir avisos",shareOn:"Al guardar se ofrecerá compartir.",
+ sShare:"Compartir avisos",shareOn:"Las fotos nuevas se envían al guardarlas.",
  shareOff:"Las fotos se quedan en el dispositivo.",shareNoSrv:"Sin servidor – la app funciona solo en local.",
  sName:"Nombre",hName:"Opcional. Aparece en los avisos compartidos si lo eliges al guardar. No uses tu nombre real.",
  sSync:"Sincronización",sSyncNow:"Enviar ahora",syncLine:"{0} compartidos · {1} pendientes · {2} de otros",
@@ -1436,12 +1441,27 @@ async function startCamera(){
   }
 }
 document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible"&&!stream) startCamera(); });
+async function decodeToCanvas(blob,maxPx){
+  const fit=(w,h)=>{ const s=Math.min(1,maxPx/Math.max(w,h));
+    const c=document.createElement("canvas");
+    c.width=Math.max(1,Math.round(w*s)); c.height=Math.max(1,Math.round(h*s)); return c; };
+  try{
+    const bmp=await createImageBitmap(blob);
+    const c=fit(bmp.width,bmp.height);
+    c.getContext("2d").drawImage(bmp,0,0,c.width,c.height); bmp.close();
+    return c;
+  }catch(e){ /* Format unbekannt – zweiter Versuch über ein Bildelement */ }
+  const url=URL.createObjectURL(blob);
+  try{
+    const img=await new Promise((res,rej)=>{ const i=new Image();
+      i.onload=()=>res(i); i.onerror=()=>rej(new Error("decode")); i.src=url; });
+    const c=fit(img.naturalWidth,img.naturalHeight);
+    c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+    return c;
+  } finally { URL.revokeObjectURL(url); }
+}
 async function shrink(blob,maxPx,q){
-  const bmp=await createImageBitmap(blob);
-  const s=Math.min(1,maxPx/Math.max(bmp.width,bmp.height));
-  const c=document.createElement("canvas");
-  c.width=Math.round(bmp.width*s); c.height=Math.round(bmp.height*s);
-  c.getContext("2d").drawImage(bmp,0,0,c.width,c.height); bmp.close();
+  const c=await decodeToCanvas(blob,maxPx);
   return new Promise(r=>c.toBlob(r,"image/jpeg",q));
 }
 async function capture(){
@@ -1560,10 +1580,11 @@ function exifToRec(tags){
 }
 
 async function importFiles(files){
-  files = Array.from(files||[]).filter(f=>/^image\//.test(f.type||""));
+  // Kein Filtern nach f.type: Android liefert bei manchen Quellen gar keinen MIME-Typ.
+  files = Array.from(files||[]);
   if(!files.length){ toast(T("libNone")); return; }
   toast(T("libBusy"));
-  let ok=0, ohne=0, letzte=null;
+  let ok=0, ohne=0, schlecht=0, letzte=null;
   for(const f of files){
     try{
       const head = await f.slice(0, 512*1024).arrayBuffer();
@@ -1580,11 +1601,12 @@ async function importFiles(files){
       rec.thumb = await shrink(f,240,.72);
       await DB.put("shots",rec);
       letzte = rec.thumb; ok++; if(rec.lat==null) ohne++;
-    }catch(e){ console.warn("import",e); }
+    }catch(e){ schlecht++; console.warn("import",f && f.name, e); }
   }
   if(letzte) $("#lastthumb").src = URL.createObjectURL(letzte);
   refreshList(); renderMap();
-  toast(ok ? T("libDone", ok, ohne) : T("libNone"));
+  toast(ok ? T("libDone", ok, ohne) + (schlecht ? " · " + T("libBad", schlecht) : "")
+           : T("libBad", schlecht || files.length));
   pushPending();
 }
 
@@ -1655,7 +1677,14 @@ function buildExif(rec){
    ========================================================= */
 const cloudReady = () => !!(SET.cloudUrl && SET.cloudKey);
 const Cloud = {
-  h(extra){ return Object.assign({apikey:SET.cloudKey,Authorization:"Bearer "+SET.cloudKey}, extra||{}); },
+  h(extra){
+    const k = SET.cloudKey || "";
+    const base = { apikey:k };
+    // Nur die alten JWT-Schlüssel (eyJ…) dürfen zusätzlich als Bearer mitgehen.
+    // Neue sb_publishable_-Schlüssel sind keine JWTs und werden dort mit 401 abgewiesen.
+    if(/^eyJ/.test(k)) base.Authorization = "Bearer " + k;
+    return Object.assign(base, extra||{});
+  },
   async put(path,blob){
     const r=await fetch(SET.cloudUrl+"/storage/v1/object/fotos/"+path,
       {method:"POST",headers:this.h({"Content-Type":"image/jpeg"}),body:blob});
@@ -1671,7 +1700,7 @@ const Cloud = {
     const q="/rest/v1/sichtungen?select=id,ts,lat,lon,alt_msl,heading,kategorie,notiz,autor,foto"
       +(sinceIso?"&ts=gte."+sinceIso:"")+"&order=ts.desc&limit=1000";
     const r=await fetch(SET.cloudUrl+q,{headers:this.h()});
-    if(!r.ok) throw new Error("List "+r.status);
+    if(!r.ok) throw new Error("HTTP "+r.status+" "+(await r.text()).slice(0,80));
     return r.json();
   },
   async update(id,geheim,kategorie,notiz){
@@ -1688,7 +1717,7 @@ const Cloud = {
   },
   url(path){ return SET.cloudUrl+"/storage/v1/object/public/fotos/"+path; }
 };
-let pushing=false;
+let pushing=false, lastError="";
 async function pushPending(){
   if(pushing||!cloudReady()||!navigator.onLine) return;
   pushing=true;
@@ -1704,7 +1733,8 @@ async function pushPending(){
           heading:rec.heading, tilt:rec.tilt, kategorie:rec.kategorie, notiz:rec.notiz,
           autor:rec.autor||null, geheim:rec.geheim, foto:name });
         rec.sync=2; await DB.put("shots",rec);
-      }catch(e){ console.warn("push",e); break; }
+      }catch(e){ lastError=String(e.message||e); console.warn("push",e);
+        toast(T("serverFail")+" · "+lastError); break; }
     }
   } finally { pushing=false; paintSyncState(); refreshList(); }
 }
@@ -1718,15 +1748,17 @@ async function pullRemote(){
     for(const r of rows) await DB.put("fremde",{
       id:r.id, ts:Date.parse(r.ts), lat:r.lat, lon:r.lon, altMsl:r.alt_msl, heading:r.heading,
       kategorie:r.kategorie||"other", notiz:r.notiz||"", autor:r.autor||"", foto:r.foto, holTs:Date.now() });
-    toast(T("loadedN",rows.length)); renderMap();
-  }catch(e){ toast(T("serverFail")); }
+    lastError=""; toast(T("loadedN",rows.length)); renderMap();
+  }catch(e){ lastError=String(e.message||e); toast(T("serverFail")+" · "+lastError); }
   paintSyncState();
 }
 async function paintSyncState(){
   const all=await DB.all("shots");
   const fremd=(await DB.all("fremde")).length;
   $("#syncState").textContent = !cloudReady() ? T("noServer")
-    : T("syncLine", all.filter(r=>r.sync===2).length, all.filter(r=>r.sync===1).length, fremd);
+    : T("syncLine", all.filter(r=>r.sync===2).length, all.filter(r=>r.sync===1).length, fremd)
+      + (lastError ? "\n⚠ " + lastError : "");
+  $("#syncState").style.whiteSpace = "pre-line";
 }
 window.addEventListener("online", pushPending);
 
@@ -2029,7 +2061,11 @@ $("#calBtn").onclick=calibrate;
 $("#syncNow").onclick=()=>{pushPending();pullRemote();};
 $("#expZip").onclick=exportZip;
 $("#libBtn").onclick=()=>$("#libInput").click();
-$("#libInput").onchange=async e=>{ const f=e.target.files; e.target.value=""; await importFiles(f); };
+$("#libInput").onchange=async e=>{
+  const f=Array.from(e.target.files||[]);   // erst kopieren – FileList ist eine lebende Liste
+  e.target.value="";                        // und erst danach das Feld leeren
+  await importFiles(f);
+};
 $("#wipe").onclick=async()=>{ if(confirm(T("sWipeAsk"))){
   await DB.clear("shots"); await DB.clear("fremde"); refreshList(); renderMap(); toast(T("wiped")); }};
 $("#persist").onclick=async()=>{ if(navigator.storage?.persist){
