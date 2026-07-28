@@ -802,7 +802,9 @@ label.field .hint{display:block;margin-top:7px;font-size:11px;color:var(--sand-d
       <video id="video" playsinline muted autoplay></video>
       <div id="noCam"><span class="eyebrow" data-i18n="camOff"></span>
         <span id="noCamTxt"></span>
-        <button class="btn go" id="startCam" data-i18n="camStart"></button></div>
+        <button class="btn go" id="startCam" data-i18n="camStart"></button>
+        <span id="camInstall" data-i18n="camInstall"
+          style="display:none;font-size:13px;line-height:1.5;color:var(--relief);max-width:330px"></span></div>
       <div id="reticle">
         <div id="tape"><div id="tapeInner"></div></div>
         <div id="tapeMark"></div><div id="tapeVal">––</div>
@@ -962,13 +964,18 @@ const CLOUD_DEFAULT = {
   key: CFG.key || ""    // the public anon key
 };
 
-const APP_VERSION = "3.8.0";
+const APP_VERSION = "3.10.0";
 
 /* =========================================================
    Sprachen
    ========================================================= */
 const I18N = {
 de:{
+ camDeniedIos:"Safari merkt sich eine einmal abgelehnte Freigabe. Tippe links in der Adresszeile auf ᴀA, dann Website-Einstellungen, dann Kamera auf Fragen stellen.",
+ camDeniedAndroid:"Chrome merkt sich eine einmal abgelehnte Freigabe. Tippe links in der Adresszeile auf das Schloss, dann Berechtigungen, dort die Kamera zurücksetzen.",
+ camBusy:"Die Kamera wird gerade von einer anderen App benutzt. Schließe sie und versuche es erneut.",
+ camNone:"Es wurde keine Kamera gefunden.",
+ camInstall:"Einfacher: App über das Teilen-Symbol zum Home-Bildschirm hinzufügen. Dort fragt sie erneut nach der Kamera.",
  sConfig:"config.js",
  sTest:"Test",
  updSearch:"Suche nach Update …",
@@ -1027,6 +1034,11 @@ de:{
  hPrivacy:"Aufnahmen liegen immer zuerst auf dem Gerät. Geteilte Beiträge sind für alle sichtbar, die diese App nutzen – ohne Anmeldung, ohne Prüfung. Lade nichts hoch, das Personen zeigt. Kartenkacheln von OpenStreetMap."
 },
 en:{
+ camDeniedIos:"Safari remembers a denied permission. Tap ᴀA on the left of the address bar, then Website Settings, then set Camera to Ask.",
+ camDeniedAndroid:"Chrome remembers a denied permission. Tap the lock icon on the left of the address bar, then Permissions, then reset Camera.",
+ camBusy:"The camera is in use by another app. Close it and try again.",
+ camNone:"No camera found.",
+ camInstall:"Easier: add the app to your home screen via the share icon. It will ask for the camera again there.",
  sConfig:"config.js",
  sTest:"Test",
  updSearch:"Checking for update …",
@@ -1085,6 +1097,11 @@ en:{
  hPrivacy:"Photos always stay on the device first. Shared reports are visible to everyone using this app – no account, no moderation. Don't upload anything showing people. Map tiles by OpenStreetMap."
 },
 fr:{
+ camDeniedIos:"Safari retient un refus. Touchez ᴀA à gauche de la barre d'adresse, puis Réglages du site, puis mettez Caméra sur Demander.",
+ camDeniedAndroid:"Chrome retient un refus. Touchez le cadenas à gauche de la barre d'adresse, puis Autorisations, puis réinitialisez la caméra.",
+ camBusy:"La caméra est utilisée par une autre application. Fermez-la et réessayez.",
+ camNone:"Aucune caméra trouvée.",
+ camInstall:"Plus simple : ajoutez l'app à l'écran d'accueil via l'icône de partage. Elle redemandera la caméra.",
  sConfig:"config.js",
  sTest:"Test",
  updSearch:"Recherche de mise à jour …",
@@ -1143,6 +1160,11 @@ fr:{
  hPrivacy:"Les photos restent d'abord sur l'appareil. Les observations partagées sont visibles par tous les utilisateurs – sans compte ni modération. Ne publiez rien montrant des personnes. Fonds de carte OpenStreetMap."
 },
 it:{
+ camDeniedIos:"Safari ricorda un rifiuto. Tocca ᴀA a sinistra nella barra degli indirizzi, poi Impostazioni sito, quindi imposta Fotocamera su Chiedi.",
+ camDeniedAndroid:"Chrome ricorda un rifiuto. Tocca il lucchetto a sinistra nella barra degli indirizzi, poi Autorizzazioni, quindi reimposta la fotocamera.",
+ camBusy:"La fotocamera è usata da un'altra app. Chiudila e riprova.",
+ camNone:"Nessuna fotocamera trovata.",
+ camInstall:"Più semplice: aggiungi l'app alla schermata Home con l'icona di condivisione. Lì chiederà di nuovo la fotocamera.",
  sConfig:"config.js",
  sTest:"Test",
  updSearch:"Ricerca aggiornamento …",
@@ -1201,6 +1223,11 @@ it:{
  hPrivacy:"Le foto restano prima di tutto sul dispositivo. Le segnalazioni condivise sono visibili a chiunque usi l'app – senza registrazione né moderazione. Non caricare immagini con persone. Mappe di OpenStreetMap."
 },
 es:{
+ camDeniedIos:"Safari recuerda un permiso denegado. Toca ᴀA a la izquierda de la barra de direcciones, luego Ajustes del sitio, y pon Cámara en Preguntar.",
+ camDeniedAndroid:"Chrome recuerda un permiso denegado. Toca el candado a la izquierda de la barra de direcciones, luego Permisos, y restablece la cámara.",
+ camBusy:"Otra aplicación está usando la cámara. Ciérrala e inténtalo de nuevo.",
+ camNone:"No se encontró ninguna cámara.",
+ camInstall:"Más fácil: añade la app a la pantalla de inicio con el icono de compartir. Allí volverá a pedir la cámara.",
  sConfig:"config.js",
  sTest:"Test",
  updSearch:"Buscando actualización …",
@@ -1456,19 +1483,59 @@ setInterval(paintReadout,2000);
 /* =========================================================
    Kamera
    ========================================================= */
-let stream=null;
+let stream=null, kameraStartet=false, ansicht="v-cam";
+
+// Beendet die Aufnahme und gibt die Kamera an das System zurueck.
+function stopCamera(){
+  if(stream){ try{ stream.getTracks().forEach(t=>t.stop()); }catch(e){} stream=null; }
+  const v=$("#video"); if(v && v.srcObject) v.srcObject=null;
+}
+// Ein vorhandenes Stream-Objekt heisst noch nicht, dass die Kamera laeuft:
+// Android beendet die Videospur beim Wechsel in den Hintergrund.
+function kameraLaeuft(){
+  const t = stream && stream.getVideoTracks && stream.getVideoTracks()[0];
+  return !!(t && t.readyState==="live" && !t.muted);
+}
+const istIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent)
+  || (navigator.platform==="MacIntel" && navigator.maxTouchPoints>1);
+const istInstalliert = () => window.navigator.standalone === true
+  || (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
 async function startCamera(){
+  if(kameraStartet || kameraLaeuft()) return;
+  kameraStartet=true;
+  stopCamera();                       // Reste einer toten Spur wegraeumen
   try{
     stream=await navigator.mediaDevices.getUserMedia({
       video:{facingMode:{ideal:"environment"},width:{ideal:2560},height:{ideal:1440}},audio:false});
-    $("#video").srcObject=stream; $("#noCam").style.display="none";
+    const v=$("#video");
+    v.srcObject=stream;
+    try{ await v.play(); }catch(e){}
+    $("#noCam").style.display="none";
+    // Beendet das System die Spur, sofort neu anfordern, sofern wir im Sucher stehen.
+    stream.getVideoTracks().forEach(t=>{
+      t.onended = () => { stopCamera();
+        if(ansicht==="v-cam" && document.visibilityState==="visible") startCamera(); };
+    });
   }catch(err){
     $("#noCam").style.display="flex";
-    $("#noCamTxt").textContent = (location.protocol==="https:"||location.hostname==="localhost")
-      ? T("camDenied") : T("camHttps");
-  }
+    const n = err && err.name;
+    let txt;
+    if(location.protocol!=="https:" && location.hostname!=="localhost") txt = T("camHttps");
+    else if(n==="NotAllowedError" || n==="SecurityError")
+      txt = istIOS() ? T("camDeniedIos") : T("camDeniedAndroid");
+    else if(n==="NotReadableError" || n==="AbortError") txt = T("camBusy");
+    else if(n==="NotFoundError" || n==="OverconstrainedError") txt = T("camNone");
+    else txt = T("camDenied") + (n ? " (" + n + ")" : "");
+    $("#noCamTxt").textContent = txt;
+    $("#camInstall").style.display = (istIOS() && !istInstalliert()) ? "block" : "none";
+  } finally { kameraStartet=false; }
 }
-document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible"&&!stream) startCamera(); });
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="hidden"){ stopCamera(); return; }
+  if(ansicht==="v-cam") startCamera();
+});
+// Beim Verlassen der Seite ebenfalls freigeben, damit andere Apps die Kamera bekommen.
+window.addEventListener("pagehide", stopCamera);
 async function decodeToCanvas(blob,maxPx){
   const fit=(w,h)=>{ const s=Math.min(1,maxPx/Math.max(w,h));
     const c=document.createElement("canvas");
@@ -2129,6 +2196,8 @@ async function calibrate(){
    Bedienung
    ========================================================= */
 function show(id){
+  ansicht = id;
+  if(id==="v-cam") startCamera(); else stopCamera();   // spart Akku in den anderen Ansichten
   document.querySelectorAll(".view").forEach(v=>v.classList.toggle("on",v.id===id));
   document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===id));
   if(id==="v-map"){
