@@ -885,7 +885,9 @@ label.field .hint{display:block;margin-top:7px;font-size:11px;color:var(--sand-d
 
       <div class="rowline"><div><div class="eyebrow" data-i18n="sSync"></div>
         <div class="num" style="font-size:12px;color:var(--sand-dim)" id="syncState">–</div></div>
-        <button class="btn" id="syncNow" data-i18n="sSyncNow"></button></div>
+        <div style="display:flex;gap:8px;flex-direction:column">
+          <button class="btn" id="syncNow" data-i18n="sSyncNow"></button>
+          <button class="btn" id="testNow" data-i18n="sTest"></button></div></div>
 
       <label class="field"><span class="eyebrow" data-i18n="sRange"></span>
         <input type="range" id="setRange" min="10" max="2000" step="10">
@@ -955,13 +957,14 @@ const CLOUD_DEFAULT = {
   key: ""    // the public anon key
 };
 
-const APP_VERSION = "3.4.0";
+const APP_VERSION = "3.5.0";
 
 /* =========================================================
    Sprachen
    ========================================================= */
 const I18N = {
 de:{
+ sTest:"Test",
  updSearch:"Suche nach Update …",
  libBad:"{0} nicht lesbar",
  libBtn:"Bibliothek",libBusy:"Wird gelesen …",libDone:"{0} übernommen · {1} ohne Position",
@@ -1018,6 +1021,7 @@ de:{
  hPrivacy:"Aufnahmen liegen immer zuerst auf dem Gerät. Geteilte Beiträge sind für alle sichtbar, die diese App nutzen – ohne Anmeldung, ohne Prüfung. Lade nichts hoch, das Personen zeigt. Kartenkacheln von OpenStreetMap."
 },
 en:{
+ sTest:"Test",
  updSearch:"Checking for update …",
  libBad:"{0} unreadable",
  libBtn:"Library",libBusy:"Reading …",libDone:"{0} imported · {1} without position",
@@ -1074,6 +1078,7 @@ en:{
  hPrivacy:"Photos always stay on the device first. Shared reports are visible to everyone using this app – no account, no moderation. Don't upload anything showing people. Map tiles by OpenStreetMap."
 },
 fr:{
+ sTest:"Test",
  updSearch:"Recherche de mise à jour …",
  libBad:"{0} illisibles",
  libBtn:"Galerie",libBusy:"Lecture …",libDone:"{0} importées · {1} sans position",
@@ -1130,6 +1135,7 @@ fr:{
  hPrivacy:"Les photos restent d'abord sur l'appareil. Les observations partagées sont visibles par tous les utilisateurs – sans compte ni modération. Ne publiez rien montrant des personnes. Fonds de carte OpenStreetMap."
 },
 it:{
+ sTest:"Test",
  updSearch:"Ricerca aggiornamento …",
  libBad:"{0} non leggibili",
  libBtn:"Galleria",libBusy:"Lettura …",libDone:"{0} importate · {1} senza posizione",
@@ -1186,6 +1192,7 @@ it:{
  hPrivacy:"Le foto restano prima di tutto sul dispositivo. Le segnalazioni condivise sono visibili a chiunque usi l'app – senza registrazione né moderazione. Non caricare immagini con persone. Mappe di OpenStreetMap."
 },
 es:{
+ sTest:"Test",
  updSearch:"Buscando actualización …",
  libBad:"{0} ilegibles",
  libBtn:"Galería",libBusy:"Leyendo …",libDone:"{0} importadas · {1} sin posición",
@@ -1680,7 +1687,15 @@ function buildExif(rec){
 /* =========================================================
    Gemeinsame Datenbank
    ========================================================= */
-const cloudReady = () => !!(SET.cloudUrl && SET.cloudKey);
+function cloudBase(){
+  let u = (SET.cloudUrl||"").replace(/[\s\u200B-\u200D\uFEFF]/g,"");   // Leer- und Steuerzeichen
+  if(!u) return "";
+  if(!/^https?:\/\//i.test(u)) u = "https://" + u;                     // fehlendes https ergänzen
+  u = u.replace(/\/+$/,"");                                            // ALLE Schrägstriche am Ende
+  u = u.replace(/\/(rest|storage|auth)\/v[0-9].*$/i,"");                // versehentlich mitkopierter Pfad
+  return u;
+}
+const cloudReady = () => !!(cloudBase() && SET.cloudKey);
 const Cloud = {
   h(extra){
     const k = SET.cloudKey || "";
@@ -1691,12 +1706,12 @@ const Cloud = {
     return Object.assign(base, extra||{});
   },
   async put(path,blob){
-    const r=await fetch(SET.cloudUrl+"/storage/v1/object/fotos/"+path,
+    const r=await fetch(cloudBase()+"/storage/v1/object/fotos/"+path,
       {method:"POST",headers:this.h({"Content-Type":"image/jpeg"}),body:blob});
     if(!r.ok && r.status!==409) throw new Error("Upload "+r.status);
   },
   async insert(row){
-    const r=await fetch(SET.cloudUrl+"/rest/v1/sichtungen",
+    const r=await fetch(cloudBase()+"/rest/v1/sichtungen",
       {method:"POST",headers:this.h({"Content-Type":"application/json",Prefer:"return=minimal"}),
        body:JSON.stringify(row)});
     if(!r.ok && r.status!==409) throw new Error("Insert "+r.status);
@@ -1704,25 +1719,62 @@ const Cloud = {
   async list(sinceIso){
     const q="/rest/v1/sichtungen?select=id,ts,lat,lon,alt_msl,heading,kategorie,notiz,autor,foto"
       +(sinceIso?"&ts=gte."+sinceIso:"")+"&order=ts.desc&limit=1000";
-    const r=await fetch(SET.cloudUrl+q,{headers:this.h()});
+    const r=await fetch(cloudBase()+q,{headers:this.h()});
     if(!r.ok) throw new Error("HTTP "+r.status+" "+(await r.text()).slice(0,80));
     return r.json();
   },
   async update(id,geheim,kategorie,notiz){
-    const r=await fetch(SET.cloudUrl+"/rest/v1/rpc/sichtung_aendern",
+    const r=await fetch(cloudBase()+"/rest/v1/rpc/sichtung_aendern",
       {method:"POST",headers:this.h({"Content-Type":"application/json"}),
        body:JSON.stringify({p_id:id,p_geheim:geheim,p_kategorie:kategorie,p_notiz:notiz})});
     return r.ok;
   },
   async remove(id,geheim){
-    const r=await fetch(SET.cloudUrl+"/rest/v1/rpc/sichtung_loeschen",
+    const r=await fetch(cloudBase()+"/rest/v1/rpc/sichtung_loeschen",
       {method:"POST",headers:this.h({"Content-Type":"application/json"}),
        body:JSON.stringify({p_id:id,p_geheim:geheim})});
     return r.ok;
   },
-  url(path){ return SET.cloudUrl+"/storage/v1/object/public/fotos/"+path; }
+  url(path){ return cloudBase()+"/storage/v1/object/public/fotos/"+path; }
 };
 let pushing=false, lastError="";
+
+async function testCloud(){
+  const b = cloudBase(), zeilen = [];
+  zeilen.push("Adresse   " + (b || "— fehlt —"));
+  zeilen.push("Eingabe   " + (SET.cloudUrl || "—"));
+  zeilen.push("Schlüssel " + (SET.cloudKey
+    ? SET.cloudKey.slice(0,18) + "… (" + SET.cloudKey.length + " Zeichen)" : "— fehlt —"));
+  zeilen.push("");
+  if(!b || !SET.cloudKey){ zeigeTest(zeilen); return; }
+  const probe = async (titel, url) => {
+    zeilen.push(titel); zeilen.push("  " + url);
+    try{
+      const r = await fetch(url, {headers: Cloud.h()});
+      const t = (await r.text()).slice(0,200).replace(/\s+/g," ");
+      zeilen.push("  → " + r.status + (r.ok ? " OK" : "") + (t ? "  " + t : ""));
+    }catch(e){ zeilen.push("  → " + (e.message || e)); }
+    zeilen.push("");
+  };
+  await probe("1  Schnittstelle", b + "/rest/v1/");
+  await probe("2  Tabelle sichtungen", b + "/rest/v1/sichtungen?select=id&limit=1");
+  await probe("3  Speicher fotos", b + "/storage/v1/object/public/fotos/__test.jpg");
+  zeilen.push("Erwartet:");
+  zeilen.push("1 → 200");
+  zeilen.push("2 → 200 mit [] oder Einträgen");
+  zeilen.push("3 → 400/404 mit \"Object not found\"");
+  zeilen.push("   Steht dort \"Bucket not found\", fehlt der Speicher-Eimer.");
+  zeigeTest(zeilen);
+}
+function zeigeTest(zeilen){
+  const sh = $("#sheet");
+  sh.innerHTML = '<div class="head"><h2>Test</h2><button class="btn" id="tClose">'+T("dClose")+'</button></div>'
+    + '<div class="scroll" style="padding:14px"><pre style="font-family:var(--mono);font-size:11px;'
+    + 'line-height:1.6;white-space:pre-wrap;word-break:break-all;color:var(--sand)">'
+    + esc(zeilen.join("\n")) + '</pre></div>';
+  sh.classList.add("on");
+  $("#tClose").onclick = () => sh.classList.remove("on");
+}
 async function pushPending(){
   if(pushing||!cloudReady()||!navigator.onLine) return;
   pushing=true;
@@ -2048,8 +2100,12 @@ function show(id){
   document.querySelectorAll(".view").forEach(v=>v.classList.toggle("on",v.id===id));
   document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===id));
   if(id==="v-map"){
-    if(!map){ initMap(); renderMap(); if(cloudReady()) pullRemote(); }
-    setTimeout(()=>map.invalidateSize(),60);
+    const erstmals = !map;
+    if(erstmals){ initMap(); if(cloudReady()) pullRemote(); }
+    renderMap();                                   // immer neu zeichnen, nicht nur beim ersten Mal
+    setTimeout(()=>{ map.invalidateSize();
+      if(erstmals && S.lat!=null) map.setView([S.lat,S.lon],14);
+    },60);
   }
   if(id==="v-list") refreshList();
   if(id==="v-set"){ paintSensState(); paintSyncState(); }
@@ -2064,6 +2120,7 @@ $("#pullNow").onclick=pullRemote;
 $("#cacheTiles").onclick=cacheTiles;
 $("#calBtn").onclick=calibrate;
 $("#syncNow").onclick=()=>{pushPending();pullRemote();};
+$("#testNow").onclick=testCloud;
 $("#expZip").onclick=exportZip;
 $("#libBtn").onclick=()=>$("#libInput").click();
 $("#libInput").onchange=async e=>{
