@@ -955,13 +955,14 @@ const CLOUD_DEFAULT = {
   key: ""    // the public anon key
 };
 
-const APP_VERSION = "3.3.0";
+const APP_VERSION = "3.4.0";
 
 /* =========================================================
    Sprachen
    ========================================================= */
 const I18N = {
 de:{
+ updSearch:"Suche nach Update …",
  libBad:"{0} nicht lesbar",
  libBtn:"Bibliothek",libBusy:"Wird gelesen …",libDone:"{0} übernommen · {1} ohne Position",
  libNone:"Keine Bilder gelesen",savedShared:"Gespeichert & gesendet",dEdit:"Bedingung & Notiz",
@@ -1017,6 +1018,7 @@ de:{
  hPrivacy:"Aufnahmen liegen immer zuerst auf dem Gerät. Geteilte Beiträge sind für alle sichtbar, die diese App nutzen – ohne Anmeldung, ohne Prüfung. Lade nichts hoch, das Personen zeigt. Kartenkacheln von OpenStreetMap."
 },
 en:{
+ updSearch:"Checking for update …",
  libBad:"{0} unreadable",
  libBtn:"Library",libBusy:"Reading …",libDone:"{0} imported · {1} without position",
  libNone:"No images read",savedShared:"Saved & sent",dEdit:"Conditions & note",
@@ -1072,6 +1074,7 @@ en:{
  hPrivacy:"Photos always stay on the device first. Shared reports are visible to everyone using this app – no account, no moderation. Don't upload anything showing people. Map tiles by OpenStreetMap."
 },
 fr:{
+ updSearch:"Recherche de mise à jour …",
  libBad:"{0} illisibles",
  libBtn:"Galerie",libBusy:"Lecture …",libDone:"{0} importées · {1} sans position",
  libNone:"Aucune image lue",savedShared:"Enregistré et envoyé",dEdit:"Conditions & note",
@@ -1127,6 +1130,7 @@ fr:{
  hPrivacy:"Les photos restent d'abord sur l'appareil. Les observations partagées sont visibles par tous les utilisateurs – sans compte ni modération. Ne publiez rien montrant des personnes. Fonds de carte OpenStreetMap."
 },
 it:{
+ updSearch:"Ricerca aggiornamento …",
  libBad:"{0} non leggibili",
  libBtn:"Galleria",libBusy:"Lettura …",libDone:"{0} importate · {1} senza posizione",
  libNone:"Nessuna immagine letta",savedShared:"Salvato e inviato",dEdit:"Condizioni e nota",
@@ -1182,6 +1186,7 @@ it:{
  hPrivacy:"Le foto restano prima di tutto sul dispositivo. Le segnalazioni condivise sono visibili a chiunque usi l'app – senza registrazione né moderazione. Non caricare immagini con persone. Mappe di OpenStreetMap."
 },
 es:{
+ updSearch:"Buscando actualización …",
  libBad:"{0} ilegibles",
  libBtn:"Galería",libBusy:"Leyendo …",libDone:"{0} importadas · {1} sin posición",
  libNone:"No se leyó ninguna imagen",savedShared:"Guardado y enviado",dEdit:"Condiciones y nota",
@@ -2148,7 +2153,25 @@ startOrient(); startGeo(); startCamera();
 $("#noCamTxt").textContent = T("camHint");
 DB.all("shots").then(a=>{ if(a.length){ const l=a[a.length-1]; if(l.thumb) $("#lastthumb").src=URL.createObjectURL(l.thumb); }});
 if(cloudReady()) setTimeout(pushPending,3000);
-if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
+let swReg=null, neuLaden=false;
+if("serviceWorker" in navigator){
+  // Merken, ob beim Start schon eine Fassung aktiv war. Nur dann ist ein
+  // Wechsel wirklich ein Update und ein Neuladen sinnvoll.
+  const hatteFassung = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener("controllerchange", ()=>{
+    if(!hatteFassung || neuLaden) return;
+    neuLaden = true; location.reload();
+  });
+  navigator.serviceWorker.register("sw.js").then(reg=>{
+    swReg = reg;
+    reg.update().catch(()=>{});
+    setInterval(()=>reg.update().catch(()=>{}), 3600e3);
+  }).catch(()=>{});
+}
+// Tippen auf die Versionsnummer sucht von Hand nach einer neuen Fassung
+$("#ver").onclick = () => { toast(T("updSearch"));
+  if(swReg) swReg.update().catch(()=>{}); };
+$("#ver").style.cursor = "pointer";
 </script>
 </body>
 </html>

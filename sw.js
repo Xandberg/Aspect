@@ -1,5 +1,5 @@
 /* Aspect Conditions – Service Worker */
-const SHELL = "aspect-shell-v6";
+const SHELL = "aspect-shell-v7";
 const TILES = "aspect-tiles";
 const MEDIA = "aspect-media";
 
