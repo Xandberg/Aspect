@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <meta name="theme-color" content="#0B1E26">
-<title>Feldblick</title>
+<title>Aspect Conditions</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
-<style>/* Leaflet 1.9.4 (c) Vladimir Agafonkin, BSD-2 */
+<style>/* Leaflet 1.9.4, BSD-2 */
 /* required styles */
 
 .leaflet-pane,
@@ -672,15 +672,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
 </style>
 <style>
 :root{
-  --ink:#0B1E26;          /* Tiefes Petrol, Gehäusefarbe */
-  --ink-2:#12303A;        /* Flächen */
-  --ink-3:#1D4650;        /* Linien, Höhenschichtlinien */
-  --sand:#E9DFC9;         /* Schrift */
-  --sand-dim:#9FAAA6;
-  --bearing:#FF6A2B;      /* Richtung */
-  --relief:#C58A4E;       /* Höhe */
-  --grid:#5FB2D6;         /* Position */
-  --alarm:#E24B4B;
+  --ink:#0B1E26; --ink-2:#12303A; --ink-3:#1D4650;
+  --sand:#E9DFC9; --sand-dim:#9FAAA6;
+  --bearing:#FF6A2B; --other:#57C2A4; --relief:#C58A4E; --grid:#5FB2D6; --alarm:#E24B4B;
   --r:3px;
   --sans:system-ui,"Roboto",sans-serif;
   --cond:"Roboto Condensed","Arial Narrow",system-ui,sans-serif;
@@ -690,249 +684,259 @@ svg.leaflet-image-layer.leaflet-interactive path {
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;overflow:hidden;background:var(--ink);color:var(--sand);font-family:var(--sans)}
 body{display:flex;flex-direction:column}
-
-/* ---------- Typografie ---------- */
 .eyebrow{font-family:var(--cond);text-transform:uppercase;letter-spacing:.18em;font-size:11px;color:var(--sand-dim)}
 .num{font-family:var(--mono);font-variant-numeric:tabular-nums}
 h2{font-family:var(--cond);text-transform:uppercase;letter-spacing:.12em;font-size:15px;margin:0;font-weight:600}
-
-/* ---------- Grundgerüst ---------- */
 #views{flex:1;position:relative;overflow:hidden}
 .view{position:absolute;inset:0;display:none;flex-direction:column}
 .view.on{display:flex}
-
 nav{display:flex;border-top:1px solid var(--ink-3);background:var(--ink);padding-bottom:var(--safe-b)}
 nav button{flex:1;background:none;border:0;color:var(--sand-dim);padding:10px 4px 12px;font-family:var(--cond);
-  text-transform:uppercase;letter-spacing:.14em;font-size:11px;display:flex;flex-direction:column;align-items:center;gap:5px}
+  text-transform:uppercase;letter-spacing:.12em;font-size:10px;display:flex;flex-direction:column;align-items:center;gap:5px}
 nav button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.6}
 nav button[aria-selected="true"]{color:var(--sand)}
 nav button[aria-selected="true"] svg{stroke:var(--bearing)}
-
-/* ---------- Sucher ---------- */
 #stage{position:relative;flex:1;background:#000;overflow:hidden}
 #video{width:100%;height:100%;object-fit:cover;display:block}
 #noCam{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;
   gap:14px;padding:28px;text-align:center;color:var(--sand-dim);font-size:14px;line-height:1.5}
-
-/* Fadenkreuz + Kegelvorschau */
 #reticle{position:absolute;inset:0;pointer-events:none}
 #reticle .hair{position:absolute;background:rgba(233,223,201,.5)}
-#reticle .h1{left:50%;top:calc(50% - 26px);width:1px;height:16px;transform:translateX(-.5px)}
-#reticle .h2{left:50%;top:calc(50% + 10px);width:1px;height:16px;transform:translateX(-.5px)}
+#reticle .h1{left:50%;top:calc(50% - 26px);width:1px;height:16px}
+#reticle .h2{left:50%;top:calc(50% + 10px);width:1px;height:16px}
 #reticle .h3{top:50%;left:calc(50% - 26px);height:1px;width:16px}
 #reticle .h4{top:50%;left:calc(50% + 10px);height:1px;width:16px}
-
-/* Peilband */
 #tape{position:absolute;left:0;right:0;top:0;height:52px;overflow:hidden;
   background:linear-gradient(180deg,rgba(11,30,38,.82),rgba(11,30,38,0))}
 #tapeInner{position:absolute;top:0;bottom:0;left:50%;width:0}
 .tick{position:absolute;top:14px;width:1px;background:var(--sand-dim);height:7px}
 .tick.major{height:13px;background:var(--sand)}
-.tlabel{position:absolute;top:29px;transform:translateX(-50%);font-family:var(--cond);font-size:11px;
-  letter-spacing:.1em;color:var(--sand)}
+.tlabel{position:absolute;top:29px;transform:translateX(-50%);font-family:var(--cond);font-size:11px;letter-spacing:.1em;color:var(--sand)}
 .tlabel.card{color:var(--bearing);font-weight:700}
 #tapeMark{position:absolute;left:50%;top:6px;transform:translateX(-50%);width:0;height:0;
   border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid var(--bearing)}
 #tapeVal{position:absolute;right:9px;top:11px;font-family:var(--mono);font-size:15px;color:var(--bearing);
-  background:rgba(11,30,38,.72);padding:2px 6px;border-radius:var(--r);letter-spacing:.02em}
-
-/* Messwerte über dem Auslöser */
+  background:rgba(11,30,38,.72);padding:2px 6px;border-radius:var(--r)}
 #readout{position:absolute;left:0;right:0;bottom:0;padding:12px 14px 14px;
   background:linear-gradient(0deg,rgba(11,30,38,.92),rgba(11,30,38,0));display:flex;gap:10px}
 .cell{flex:1;min-width:0}
-.cell .eyebrow{display:block;margin-bottom:2px}
+.cell .eyebrow{display:block;margin-bottom:2px;font-size:10px;letter-spacing:.14em}
 .cell .v{font-family:var(--mono);font-size:17px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cell .s{font-family:var(--mono);font-size:10px;color:var(--sand-dim)}
+.cell .s{font-family:var(--mono);font-size:10px;color:var(--sand-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .c-pos .v{color:var(--grid)} .c-alt .v{color:var(--relief)} .c-dir .v{color:var(--bearing)}
 .stale{opacity:.4}
-
-/* Auslöserleiste */
 #shutterbar{display:flex;align-items:center;justify-content:space-between;padding:12px 22px;gap:16px;background:var(--ink)}
 #shutter{width:68px;height:68px;border-radius:50%;border:2px solid var(--sand);background:var(--bearing);
   box-shadow:0 0 0 5px var(--ink),0 0 0 6px var(--ink-3);flex:none}
-#shutter:disabled{background:var(--ink-3);border-color:var(--ink-3)}
 #shutter:active{transform:scale(.94)}
 .sidebtn{width:52px;height:52px;border-radius:var(--r);background:var(--ink-2);border:1px solid var(--ink-3);
-  color:var(--sand);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px;font-family:var(--cond);font-size:10px;letter-spacing:.1em}
+  color:var(--sand);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px;
+  font-family:var(--cond);font-size:9px;letter-spacing:.08em}
 .sidebtn .n{font-family:var(--mono);font-size:15px;color:var(--bearing)}
 #lastthumb{width:52px;height:52px;border-radius:var(--r);border:1px solid var(--ink-3);object-fit:cover;background:var(--ink-2)}
-
-/* ---------- Karte ---------- */
 #map{flex:1;background:var(--ink-2)}
 .leaflet-container{background:var(--ink-2);font-family:var(--sans)}
-.mapbar{display:flex;gap:8px;padding:8px 10px;background:var(--ink);border-bottom:1px solid var(--ink-3);align-items:center}
+.mapbar{display:flex;gap:8px;padding:8px 10px;background:var(--ink);align-items:center}
+.timebar{padding:4px 12px 10px;background:var(--ink);border-bottom:1px solid var(--ink-3)}
+.timebar .lbl{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:2px}
+.timebar .lbl b{font-family:var(--mono);font-size:14px;color:var(--bearing);font-weight:500}
+.timebar .lbl span.num{font-size:11px;color:var(--sand-dim)}
+input[type=range]{width:100%;accent-color:var(--bearing);margin:0}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-family:var(--cond);text-transform:uppercase;letter-spacing:.09em;font-size:11px;padding:6px 11px;
+  border-radius:20px;border:1px solid var(--ink-3);background:var(--ink-2);color:var(--sand-dim)}
+.chip[aria-pressed="true"]{background:var(--sand);color:var(--ink);border-color:var(--sand);font-weight:700}
 .pin{width:14px;height:14px;border-radius:50%;background:var(--ink);border:2px solid var(--bearing);
-  box-shadow:0 0 0 2px rgba(233,223,201,.75)}
-.pop{font-family:var(--sans);font-size:12px;color:var(--ink);min-width:186px}
-.pop img{width:100%;border-radius:2px;display:block;margin-bottom:6px}
-.pop b{font-family:var(--mono);font-weight:500}
+  box-shadow:0 0 0 2px rgba(233,223,201,.7)}
+.pin.other{border-color:var(--other)}
+.pop{font-family:var(--sans);font-size:12px;color:#0B1E26;min-width:198px}
+.pop img{width:100%;border-radius:2px;display:block;margin-bottom:6px;background:#e6e6e6;min-height:40px}
+.pop .kat{display:inline-block;font-family:var(--cond);text-transform:uppercase;letter-spacing:.1em;font-size:10px;
+  background:#0B1E26;color:#E9DFC9;padding:2px 7px;border-radius:10px;margin-bottom:5px}
+.pop .note{margin:4px 0 7px;line-height:1.45}
 .pop .row{display:flex;justify-content:space-between;gap:8px;padding:1px 0}
-
-/* ---------- Listen / Blätter ---------- */
+.pop b{font-family:var(--mono);font-weight:500}
 .scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px;border-bottom:1px solid var(--ink-3)}
 .item{display:flex;gap:12px;padding:12px 14px;border-bottom:1px solid var(--ink-2);align-items:center}
 .item img{width:62px;height:62px;object-fit:cover;border-radius:2px;background:var(--ink-2);flex:none}
 .item .meta{flex:1;min-width:0}
-.item .t{font-family:var(--mono);font-size:12px;color:var(--sand)}
-.item .d{font-family:var(--mono);font-size:11px;color:var(--sand-dim);margin-top:3px;line-height:1.45}
+.item .t{font-family:var(--mono);font-size:12px}
+.item .d{font-family:var(--mono);font-size:11px;color:var(--sand-dim);margin-top:3px;line-height:1.5}
 .item .d i{font-style:normal;color:var(--relief)}
 .item .d u{text-decoration:none;color:var(--bearing)}
-.empty{padding:56px 28px;text-align:center;color:var(--sand-dim);font-size:14px;line-height:1.6}
-
-/* Konturen als leere-Seite-Motiv */
-.contour{display:block;margin:0 auto 18px;width:120px;height:64px;opacity:.55}
-
-button.btn{font-family:var(--cond);text-transform:uppercase;letter-spacing:.12em;font-size:12px;
+.sync{font-family:var(--cond);font-size:10px;letter-spacing:.1em;text-transform:uppercase}
+.sync.up{color:var(--other)} .sync.wait{color:var(--relief)} .sync.off{color:var(--sand-dim)}
+.empty{padding:52px 28px;text-align:center;color:var(--sand-dim);font-size:14px;line-height:1.6}
+button.btn{font-family:var(--cond);text-transform:uppercase;letter-spacing:.1em;font-size:12px;
   background:var(--ink-2);color:var(--sand);border:1px solid var(--ink-3);border-radius:var(--r);padding:9px 12px}
 button.btn.go{background:var(--bearing);border-color:var(--bearing);color:#1A0A02;font-weight:700}
 button.btn.warn{color:var(--alarm);border-color:#4A2020}
-button.btn:disabled{opacity:.45}
-
 label.field{display:block;padding:13px 14px;border-bottom:1px solid var(--ink-2)}
 label.field .eyebrow{display:block;margin-bottom:7px}
-label.field input[type=number],label.field input[type=text]{width:100%;background:var(--ink-2);border:1px solid var(--ink-3);
+label.field input,label.field textarea,label.field select{width:100%;background:var(--ink-2);border:1px solid var(--ink-3);
   color:var(--sand);font-family:var(--mono);font-size:15px;padding:9px 10px;border-radius:var(--r)}
 label.field .hint{display:block;margin-top:7px;font-size:11px;color:var(--sand-dim);line-height:1.5}
-input[type=range]{width:100%;accent-color:var(--bearing)}
 .rowline{display:flex;gap:10px;padding:13px 14px;border-bottom:1px solid var(--ink-2);align-items:center;justify-content:space-between}
-
+.rowline .sub{font-size:12px;color:var(--sand-dim);line-height:1.45;max-width:210px}
+.sw{width:46px;height:26px;border-radius:14px;background:var(--ink-3);border:0;position:relative;flex:none}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--sand-dim);transition:.15s}
+.sw[aria-checked="true"]{background:var(--bearing)}
+.sw[aria-checked="true"]::after{left:23px;background:#1A0A02}
 #toast{position:fixed;left:50%;bottom:calc(88px + var(--safe-b));transform:translate(-50%,14px);opacity:0;
-  background:var(--sand);color:var(--ink);font-family:var(--cond);letter-spacing:.08em;text-transform:uppercase;
+  background:var(--sand);color:var(--ink);font-family:var(--cond);letter-spacing:.06em;text-transform:uppercase;
   font-size:12px;padding:9px 15px;border-radius:var(--r);pointer-events:none;transition:.22s;z-index:900;max-width:88vw;text-align:center}
 #toast.on{opacity:1;transform:translate(-50%,0)}
-
-#sheet{position:fixed;inset:0;background:rgba(11,30,38,.96);z-index:800;display:none;flex-direction:column}
+#sheet{position:fixed;inset:0;background:var(--ink);z-index:800;display:none;flex-direction:column}
 #sheet.on{display:flex}
 #flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:950;transition:opacity .18s}
-
-@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 :focus-visible{outline:2px solid var(--bearing);outline-offset:2px}
 </style>
 </head>
 <body>
-
 <div id="views">
 
-  <!-- ============ AUFNAHME ============ -->
   <section class="view on" id="v-cam">
     <div id="stage">
       <video id="video" playsinline muted autoplay></video>
-      <div id="noCam">
-        <span class="eyebrow">Kamera nicht aktiv</span>
-        <span id="noCamTxt">Tippe auf „Kamera starten“ und erlaube den Zugriff.</span>
-        <button class="btn go" id="startCam">Kamera starten</button>
-      </div>
-
+      <div id="noCam"><span class="eyebrow" data-i18n="camOff"></span>
+        <span id="noCamTxt"></span>
+        <button class="btn go" id="startCam" data-i18n="camStart"></button></div>
       <div id="reticle">
-        <div id="tape">
-          <div id="tapeInner"></div>
-          <div id="tapeMark"></div>
-          <div id="tapeVal">––</div>
-        </div>
-        <div class="hair h1"></div><div class="hair h2"></div>
-        <div class="hair h3"></div><div class="hair h4"></div>
+        <div id="tape"><div id="tapeInner"></div></div>
+        <div id="tapeMark"></div><div id="tapeVal">––</div>
+        <div class="hair h1"></div><div class="hair h2"></div><div class="hair h3"></div><div class="hair h4"></div>
       </div>
-
       <div id="readout">
-        <div class="cell c-pos"><span class="eyebrow">Position</span>
-          <div class="v" id="rPos">– – –</div><div class="s" id="rPosS">wartet auf GPS</div></div>
-        <div class="cell c-alt"><span class="eyebrow">Höhe ü. NN</span>
+        <div class="cell c-pos"><span class="eyebrow" data-i18n="lblPos"></span>
+          <div class="v" id="rPos">– – –</div><div class="s" id="rPosS"></div></div>
+        <div class="cell c-alt"><span class="eyebrow" data-i18n="lblAlt"></span>
           <div class="v" id="rAlt">–</div><div class="s" id="rAltS">–</div></div>
-        <div class="cell c-dir"><span class="eyebrow">Richtung</span>
+        <div class="cell c-dir"><span class="eyebrow" data-i18n="lblDir"></span>
           <div class="v" id="rDir">–</div><div class="s" id="rDirS">–</div></div>
       </div>
     </div>
-
     <div id="shutterbar">
-      <button class="sidebtn" id="toGps" title="Sensoren freigeben">
-        <span class="n" id="satN">GPS</span><span>Sensor</span></button>
-      <button id="shutter" aria-label="Foto aufnehmen"></button>
-      <img id="lastthumb" alt="Letzte Aufnahme" src="data:image/gif;base64,R0lGODlhAQABAIAAAA8eJv///yH5BAEAAAEALAAAAAABAAEAAAICTAEAOw==">
+      <button class="sidebtn" id="toGps"><span class="n" id="satN">GPS</span><span data-i18n="sensor"></span></button>
+      <button id="shutter" aria-label="Shutter"></button>
+      <img id="lastthumb" alt="" src="data:image/gif;base64,R0lGODlhAQABAIAAAA8eJv///yH5BAEAAAEALAAAAAABAAEAAAICTAEAOw==">
     </div>
   </section>
 
-  <!-- ============ KARTE ============ -->
   <section class="view" id="v-map">
     <div class="mapbar">
-      <h2 style="flex:1">Karte</h2>
-      <button class="btn" id="fitAll">Alle zeigen</button>
-      <button class="btn" id="cacheTiles">Offline laden</button>
+      <h2 style="flex:1" data-i18n="mapTitle"></h2>
+      <button class="btn" id="fitAll" data-i18n="btnShow"></button>
+      <button class="btn" id="pullNow" data-i18n="btnLoad"></button>
+      <button class="btn" id="cacheTiles" data-i18n="btnOffline"></button>
+    </div>
+    <div class="timebar">
+      <div class="lbl"><span class="eyebrow" data-i18n="period"></span><b id="tLabel"></b>
+        <span class="num" id="tCount"></span></div>
+      <input type="range" id="tRange" min="0" max="8" step="1" value="0">
+      <div class="chips" style="margin-top:9px">
+        <button class="chip" id="fAll" aria-pressed="true" data-i18n="chipAll"></button>
+        <button class="chip" id="fMine" aria-pressed="false" data-i18n="chipMine"></button>
+      </div>
     </div>
     <div id="map"></div>
   </section>
 
-  <!-- ============ ARCHIV ============ -->
   <section class="view" id="v-list">
-    <div class="head">
-      <h2>Archiv <span class="num" id="cnt" style="color:var(--bearing)"></span></h2>
+    <div class="head"><h2><span data-i18n="arcTitle"></span> <span class="num" id="cnt" style="color:var(--bearing)"></span></h2>
       <div style="display:flex;gap:8px">
-        <button class="btn" id="expGeo">GeoJSON</button>
-        <button class="btn go" id="expZip">Export</button>
-      </div>
-    </div>
+        <button class="btn" id="libBtn" data-i18n="libBtn"></button>
+        <button class="btn go" id="expZip" data-i18n="btnExport"></button></div></div>
+    <input type="file" id="libInput" accept="image/*" multiple style="display:none">
     <div class="scroll" id="listBody"></div>
   </section>
 
-  <!-- ============ EINSTELLUNGEN ============ -->
   <section class="view" id="v-set">
-    <div class="head"><h2>Einstellungen</h2><span class="eyebrow" id="ver"></span></div>
+    <div class="head"><h2 data-i18n="setTitle"></h2><span class="eyebrow" id="ver"></span></div>
     <div class="scroll">
-      <div class="rowline"><div><div class="eyebrow">Sensoren</div>
+
+      <label class="field"><span class="eyebrow" data-i18n="sLang"></span>
+        <select id="setLang">
+          <option value="auto"></option>
+          <option value="de">Deutsch</option><option value="en">English</option>
+          <option value="fr">Français</option><option value="it">Italiano</option>
+          <option value="es">Español</option>
+        </select></label>
+
+      <div class="rowline"><div><div class="eyebrow" data-i18n="sSensors"></div>
         <div class="num" style="font-size:12px;color:var(--sand-dim)" id="sensState">–</div></div>
-        <button class="btn go" id="askPerm">Freigeben</button></div>
+        <button class="btn go" id="askPerm" data-i18n="sGrant"></button></div>
 
-      <label class="field"><span class="eyebrow">Kegel – Reichweite</span>
-        <input type="range" id="setRange" min="10" max="500" step="10">
-        <span class="hint"><span class="num" id="setRangeV"></span> m Sichtweite, die der Kegel auf der Karte darstellt.</span></label>
+      <div class="rowline"><div><div class="eyebrow" data-i18n="sShare"></div>
+        <div class="sub" id="shareHint"></div></div>
+        <button class="sw" id="swShare" role="switch" aria-checked="false"></button></div>
 
-      <label class="field"><span class="eyebrow">Kegel – Öffnungswinkel</span>
+      <label class="field"><span class="eyebrow" data-i18n="sName"></span>
+        <input type="text" id="setAutor" maxlength="24">
+        <span class="hint" id="hName"></span></label>
+
+      <div class="rowline" style="display:block">
+        <div class="eyebrow" data-i18n="shPostAs"></div>
+        <div class="chips" id="setWho" style="margin-top:9px">
+          <button class="chip" data-w="name" id="whoName"></button>
+          <button class="chip" data-w="anon" data-i18n="shAnon"></button>
+        </div></div>
+
+      <div class="rowline"><div><div class="eyebrow" data-i18n="sSync"></div>
+        <div class="num" style="font-size:12px;color:var(--sand-dim)" id="syncState">–</div></div>
+        <button class="btn" id="syncNow" data-i18n="sSyncNow"></button></div>
+
+      <label class="field"><span class="eyebrow" data-i18n="sRange"></span>
+        <input type="range" id="setRange" min="10" max="2000" step="10">
+        <span class="hint" id="hRange"></span></label>
+
+      <label class="field"><span class="eyebrow" data-i18n="sFov"></span>
         <input type="range" id="setFov" min="5" max="120" step="5">
-        <span class="hint"><span class="num" id="setFovV"></span>° Bildwinkel.</span></label>
+        <span class="hint" id="hFov"></span></label>
 
-      <label class="field"><span class="eyebrow">Geoid-Undulation N</span>
+      <label class="field"><span class="eyebrow" data-i18n="sGeoid"></span>
         <input type="number" id="setGeoid" step="0.1">
-        <span class="hint">Android liefert die Höhe über dem WGS84-Ellipsoid. Höhe ü. NN = GPS-Höhe − N.
-          In Deutschland liegt N bei etwa 45–48 m. Mit „Höhe abgleichen“ wird der Wert aus einem
-          Geländemodell für deinen Standort berechnet (braucht Netz).</span></label>
-      <div class="rowline"><div><div class="eyebrow">Höhenabgleich</div>
-          <div class="num" style="font-size:12px;color:var(--sand-dim)" id="calState">noch nicht abgeglichen</div></div>
-        <button class="btn" id="calBtn">Höhe abgleichen</button></div>
+        <span class="hint" id="hGeoid"></span></label>
+      <div class="rowline"><div><div class="eyebrow" data-i18n="sCalib"></div>
+        <div class="num" style="font-size:12px;color:var(--sand-dim)" id="calState"></div></div>
+        <button class="btn" id="calBtn" data-i18n="sCalibBtn"></button></div>
 
-      <label class="field"><span class="eyebrow">Kompass-Korrektur</span>
+      <label class="field"><span class="eyebrow" data-i18n="sDecl"></span>
         <input type="number" id="setDecl" step="0.1">
-        <span class="hint">Fester Zuschlag in Grad auf die gemessene Richtung. Nur nutzen, wenn du eine
-          bekannte Peilung gegenprüfen konntest.</span></label>
+        <span class="hint" id="hDecl"></span></label>
 
-      <div class="rowline"><div><div class="eyebrow">Speicher</div>
+      <div class="rowline"><div><div class="eyebrow" data-i18n="sStorage"></div>
         <div class="num" style="font-size:12px;color:var(--sand-dim)" id="quota">–</div></div>
-        <button class="btn" id="persist">Dauerhaft</button></div>
+        <button class="btn" id="persist" data-i18n="sPersist"></button></div>
+      <div class="rowline"><div><div class="eyebrow" data-i18n="sWipe"></div>
+        <div class="sub" data-i18n="sWipeHint"></div></div>
+        <button class="btn warn" id="wipe" data-i18n="sWipeBtn"></button></div>
 
-      <div class="rowline"><div><div class="eyebrow">Archiv leeren</div>
-        <div style="font-size:12px;color:var(--sand-dim)">Löscht alle Fotos auf diesem Gerät.</div></div>
-        <button class="btn warn" id="wipe">Löschen</button></div>
+      <details style="padding:14px;border-top:1px solid var(--ink-3)">
+        <summary class="eyebrow" style="cursor:pointer" data-i18n="sServer"></summary>
+        <label class="field" style="border:0;padding:12px 0 0"><span class="eyebrow" data-i18n="sAddr"></span>
+          <input type="text" id="setUrl" placeholder="https://xxxx.supabase.co"></label>
+        <label class="field" style="border:0;padding:12px 0 0"><span class="eyebrow" data-i18n="sKey"></span>
+          <input type="text" id="setKey" placeholder="eyJ..."></label>
+        <div class="hint" id="hServer" style="font-size:11px;color:var(--sand-dim);line-height:1.5;margin-top:9px"></div>
+      </details>
 
-      <div style="padding:20px 14px 40px;color:var(--sand-dim);font-size:11px;line-height:1.7">
-        Feldblick speichert alles lokal auf dem Gerät. Es werden keine Fotos und keine Positionen
-        übertragen. Kartenkacheln kommen von OpenStreetMap und werden für die Offline-Nutzung
-        zwischengespeichert.
-      </div>
+      <div id="hPrivacy" style="padding:18px 14px 40px;color:var(--sand-dim);font-size:11px;line-height:1.7"></div>
     </div>
   </section>
 </div>
 
 <nav>
-  <button data-v="v-cam" aria-selected="true"><svg viewBox="0 0 24 24"><path d="M3 8h4l2-3h6l2 3h4v11H3z"/><circle cx="12" cy="13" r="3.6"/></svg>Aufnahme</button>
-  <button data-v="v-map"><svg viewBox="0 0 24 24"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg>Karte</button>
-  <button data-v="v-list"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="1"/><path d="M3 10h18M9 10v10"/></svg>Archiv</button>
-  <button data-v="v-set"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>Setup</button>
+  <button data-v="v-cam" aria-selected="true"><svg viewBox="0 0 24 24"><path d="M3 8h4l2-3h6l2 3h4v11H3z"/><circle cx="12" cy="13" r="3.6"/></svg><span data-i18n="navCam"></span></button>
+  <button data-v="v-map"><svg viewBox="0 0 24 24"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg><span data-i18n="navMap"></span></button>
+  <button data-v="v-list"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="1"/><path d="M3 10h18M9 10v10"/></svg><span data-i18n="navArc"></span></button>
+  <button data-v="v-set"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg><span data-i18n="navSet"></span></button>
 </nav>
 
-<div id="toast"></div>
-<div id="flash"></div>
-<div id="sheet"></div>
+<div id="toast"></div><div id="flash"></div><div id="sheet"></div>
 
-<script>/* Leaflet 1.9.4 (c) Vladimir Agafonkin, BSD-2 */
+<script>/* Leaflet 1.9.4, BSD-2 */
 /* @preserve
  * Leaflet 1.9.4, a JS library for interactive maps. https://leafletjs.com
  * (c) 2010-2023 Vladimir Agafonkin, (c) 2010-2011 CloudMade
@@ -942,180 +946,479 @@ input[type=range]{width:100%;accent-color:var(--bearing)}
 </script>
 <script>
 "use strict";
-const APP_VERSION = "1.0.0";
 
 /* =========================================================
-   Hilfsfunktionen
+   SERVER – enter here (see SERVER-EINRICHTEN.md)
+   ========================================================= */
+const CLOUD_DEFAULT = {
+  url: "",   // e.g. https://abcdefghijkl.supabase.co
+  key: ""    // the public anon key
+};
+
+const APP_VERSION = "3.1.0";
+
+/* =========================================================
+   Sprachen
+   ========================================================= */
+const I18N = {
+de:{
+ libBtn:"Bibliothek",libBusy:"Wird gelesen …",libDone:"{0} übernommen · {1} ohne Position",
+ libNone:"Keine Bilder gelesen",savedShared:"Gespeichert & gesendet",dEdit:"Bedingung & Notiz",
+ srcLib:"importiert",editSaved:"Übernommen",editRemoteFail:"Nur lokal geändert – Server nicht erreichbar",
+ navCam:"Aufnahme",navMap:"Karte",navArc:"Archiv",navSet:"Setup",sensor:"Sensor",
+ camOff:"Kamera nicht aktiv",camStart:"Kamera starten",
+ camHint:"Tippe auf „Kamera starten“ und erlaube den Zugriff.",
+ camDenied:"Kamerazugriff abgelehnt oder belegt. In den Website-Einstellungen erlauben und neu starten.",
+ camHttps:"Die Kamera braucht HTTPS.",camNotReady:"Kamera noch nicht bereit",
+ lblPos:"Position",lblAlt:"Höhe ü. NN",lblDir:"Richtung",
+ waitGps:"wartet auf GPS",noGps:"Gerät ohne GPS",denied:"Zugriff verweigert",noSignal:"kein Signal",
+ noAlt:"keine Höhe",noCompass:"kein Kompass",sensorsAsked:"Sensoren angefragt",
+ posOk:"Position ✓",posNo:"Position –",compOk:"Kompass ✓",compNo:"Kompass –",
+ mapTitle:"Karte",btnShow:"Zeigen",btnLoad:"Laden",btnOffline:"Offline",period:"Zeitraum",
+ chipAll:"Alle",chipMine:"Nur meine",cnt:"{0} Aufnahmen",cntBoth:"{0} + {1} Aufnahmen",
+ nothingRange:"Nichts im gewählten Zeitraum",tooBig:"Ausschnitt zu groß",
+ tilesLoading:"{0} Kacheln werden geladen",tilesReady:"{0} Kacheln offline verfügbar",
+ noServer:"Kein Server eingetragen",offlineShow:"Offline – zeige gespeicherte Beiträge",
+ loadedN:"{0} Beiträge geladen",serverFail:"Server nicht erreichbar",
+ t0:"24 Stunden",t1:"2 Tage",t2:"3 Tage",t3:"1 Woche",t4:"2 Wochen",t5:"1 Monat",t6:"3 Monate",t7:"1 Jahr",t8:"seit jeher",
+ kSnow:"Schnee",kAval:"Lawine",kTrail:"Weg & Steig",kRock:"Fels & Eis",kWeather:"Wetter",kWater:"Wasser",kHut:"Hütte",kOther:"Sonstiges",
+ shCond:"Bedingung",shDone:"Fertig",shWhat:"Was zeigt das Bild?",shNote:"Notiz",
+ shNotePh:"z. B. Triebschnee ab 2200 m, Rinne ausgeblasen",
+ shPostAs:"Veröffentlichen als",shAnon:"Anonym",shSaveShare:"Sichern & teilen",shLocal:"Nur lokal",shSave:"Sichern",
+ shShareHint:"Geteilte Beiträge sind für alle sichtbar und lassen sich nur von diesem Gerät aus wieder löschen.",
+ savedLocal:"Gespeichert",sending:"Wird gesendet …",
+ arcTitle:"Archiv",btnExport:"Export",emptyTitle:"Noch keine Aufnahmen.",
+ emptyHint:"Wechsle zu <b>Aufnahme</b> und drücke den Auslöser.",
+ del:"Löschen",stShared:"geteilt",stWaiting:"wartet",stLocal:"lokal",deleted:"Gelöscht",
+ nothingExp:"Nichts zu exportieren",packing:"Export wird gepackt …",
+ dMine:"Meine Aufnahme",dClose:"Schließen",dTime:"Zeit",dCond:"Bedingung",dNote:"Notiz",dPos:"Position",
+ dAlt:"Höhe ü. NN",dDir:"Blickrichtung",dGpsAlt:"GPS-Höhe",dAcc:"Lagegenauigkeit",dStatus:"Status",
+ dSave:"Foto sichern",dShare:"Teilen",dToMap:"Auf Karte",dBy:"Von",dMe:"mir",dAnon:"anonym",
+ dPostBy:"Beitrag von {0}",dView:"Ansehen",dTaken:"Aufgenommen",
+ setTitle:"Einstellungen",sLang:"Sprache",sLangAuto:"Wie das Handy",sSensors:"Sensoren",sGrant:"Freigeben",
+ sShare:"Beiträge teilen",shareOn:"Neue Aufnahmen werden beim Sichern zum Teilen vorgeschlagen.",
+ shareOff:"Neue Aufnahmen bleiben auf dem Gerät.",shareNoSrv:"Kein Server eingetragen – die App läuft rein lokal.",
+ sName:"Name",hName:"Optional. Steht bei geteilten Aufnahmen dabei, wenn du es beim Sichern auswählst. Nimm keinen Klarnamen.",
+ sSync:"Abgleich",sSyncNow:"Jetzt senden",syncLine:"{0} geteilt · {1} offen · {2} fremde",
+ sRange:"Kegel – Reichweite",hRange:"{0} m Sichtweite des Kegels auf der Karte.",
+ sFov:"Kegel – Öffnungswinkel",hFov:"{0}° Bildwinkel.",
+ sGeoid:"Geoid-Undulation N",hGeoid:"Höhe ü. NN = GPS-Höhe − N. In den Ostalpen liegt N bei etwa 47–51 m.",
+ sCalib:"Höhenabgleich",sCalibBtn:"Abgleichen",sCalibNone:"noch nicht abgeglichen",sCalibAsk:"wird abgefragt …",
+ sCalibDone:"Gelände {0} m ü. NN · N = {1}",sCalibFail:"keine Verbindung zum Höhenmodell",
+ calibWait:"Warte auf GPS-Höhe",calibOk:"Höhe abgeglichen",
+ sDecl:"Kompass-Korrektur",hDecl:"Fester Zuschlag in Grad auf die gemessene Richtung.",
+ sStorage:"Speicher",sPersist:"Dauerhaft",persistOk:"Speicher ist geschützt",persistNo:"Gerät hat abgelehnt",
+ quota:"{0} MB belegt von {1} GB",
+ sWipe:"Archiv leeren",sWipeBtn:"Löschen",sWipeHint:"Löscht alle Aufnahmen auf diesem Gerät.",
+ sWipeAsk:"Alle Aufnahmen auf diesem Gerät löschen?",wiped:"Archiv geleert",
+ sServer:"Server",sAddr:"Adresse",sKey:"Anon-Key",
+ hServer:"Normalerweise steht beides schon in der index.html. Hier nur ändern, wenn du einen eigenen Server nutzt.",
+ hPrivacy:"Aufnahmen liegen immer zuerst auf dem Gerät. Geteilte Beiträge sind für alle sichtbar, die diese App nutzen – ohne Anmeldung, ohne Prüfung. Lade nichts hoch, das Personen zeigt. Kartenkacheln von OpenStreetMap."
+},
+en:{
+ libBtn:"Library",libBusy:"Reading …",libDone:"{0} imported · {1} without position",
+ libNone:"No images read",savedShared:"Saved & sent",dEdit:"Conditions & note",
+ srcLib:"imported",editSaved:"Updated",editRemoteFail:"Changed locally only – server unreachable",
+ navCam:"Capture",navMap:"Map",navArc:"Archive",navSet:"Setup",sensor:"Sensor",
+ camOff:"Camera inactive",camStart:"Start camera",
+ camHint:"Tap “Start camera” and allow access.",
+ camDenied:"Camera access denied or in use. Allow it in site settings and restart.",
+ camHttps:"The camera needs HTTPS.",camNotReady:"Camera not ready yet",
+ lblPos:"Position",lblAlt:"Elevation",lblDir:"Bearing",
+ waitGps:"waiting for GPS",noGps:"no GPS on device",denied:"access denied",noSignal:"no signal",
+ noAlt:"no elevation",noCompass:"no compass",sensorsAsked:"Sensors requested",
+ posOk:"Position ✓",posNo:"Position –",compOk:"Compass ✓",compNo:"Compass –",
+ mapTitle:"Map",btnShow:"Show",btnLoad:"Load",btnOffline:"Offline",period:"Period",
+ chipAll:"Everyone",chipMine:"Mine only",cnt:"{0} reports",cntBoth:"{0} + {1} reports",
+ nothingRange:"Nothing in this period",tooBig:"Area too large",
+ tilesLoading:"Loading {0} tiles",tilesReady:"{0} tiles available offline",
+ noServer:"No server configured",offlineShow:"Offline – showing stored reports",
+ loadedN:"{0} reports loaded",serverFail:"Server unreachable",
+ t0:"24 hours",t1:"2 days",t2:"3 days",t3:"1 week",t4:"2 weeks",t5:"1 month",t6:"3 months",t7:"1 year",t8:"all time",
+ kSnow:"Snow",kAval:"Avalanche",kTrail:"Trail & path",kRock:"Rock & ice",kWeather:"Weather",kWater:"Water",kHut:"Hut",kOther:"Other",
+ shCond:"Conditions",shDone:"Done",shWhat:"What does the photo show?",shNote:"Note",
+ shNotePh:"e.g. windslab above 2200 m, gully scoured",
+ shPostAs:"Post as",shAnon:"Anonymous",shSaveShare:"Save & share",shLocal:"Keep local",shSave:"Save",
+ shShareHint:"Shared reports are visible to everyone and can only be deleted from this device.",
+ savedLocal:"Saved",sending:"Sending …",
+ arcTitle:"Archive",btnExport:"Export",emptyTitle:"No reports yet.",
+ emptyHint:"Go to <b>Capture</b> and press the shutter.",
+ del:"Delete",stShared:"shared",stWaiting:"pending",stLocal:"local",deleted:"Deleted",
+ nothingExp:"Nothing to export",packing:"Packing export …",
+ dMine:"My report",dClose:"Close",dTime:"Time",dCond:"Conditions",dNote:"Note",dPos:"Position",
+ dAlt:"Elevation",dDir:"Bearing",dGpsAlt:"GPS elevation",dAcc:"Position accuracy",dStatus:"Status",
+ dSave:"Save photo",dShare:"Share",dToMap:"On map",dBy:"By",dMe:"me",dAnon:"anonymous",
+ dPostBy:"Report by {0}",dView:"View",dTaken:"Taken",
+ setTitle:"Settings",sLang:"Language",sLangAuto:"Match phone",sSensors:"Sensors",sGrant:"Grant",
+ sShare:"Share reports",shareOn:"New photos will offer sharing when you save them.",
+ shareOff:"New photos stay on the device.",shareNoSrv:"No server configured – the app runs entirely offline.",
+ sName:"Name",hName:"Optional. Shown on shared reports if you pick it when saving. Don't use your real name.",
+ sSync:"Sync",sSyncNow:"Send now",syncLine:"{0} shared · {1} pending · {2} from others",
+ sRange:"Cone – range",hRange:"{0} m of sight distance drawn on the map.",
+ sFov:"Cone – field of view",hFov:"{0}° angle of view.",
+ sGeoid:"Geoid undulation N",hGeoid:"Elevation = GPS altitude − N. In the Eastern Alps N is roughly 47–51 m.",
+ sCalib:"Elevation check",sCalibBtn:"Calibrate",sCalibNone:"not calibrated yet",sCalibAsk:"querying …",
+ sCalibDone:"Terrain {0} m · N = {1}",sCalibFail:"elevation model unreachable",
+ calibWait:"Waiting for GPS altitude",calibOk:"Elevation calibrated",
+ sDecl:"Compass offset",hDecl:"Fixed offset in degrees added to the measured bearing.",
+ sStorage:"Storage",sPersist:"Persist",persistOk:"Storage is protected",persistNo:"Device refused",
+ quota:"{0} MB used of {1} GB",
+ sWipe:"Clear archive",sWipeBtn:"Delete",sWipeHint:"Deletes every report on this device.",
+ sWipeAsk:"Delete all reports on this device?",wiped:"Archive cleared",
+ sServer:"Server",sAddr:"Address",sKey:"Anon key",
+ hServer:"Normally both are already set in index.html. Only change this if you run your own server.",
+ hPrivacy:"Photos always stay on the device first. Shared reports are visible to everyone using this app – no account, no moderation. Don't upload anything showing people. Map tiles by OpenStreetMap."
+},
+fr:{
+ libBtn:"Galerie",libBusy:"Lecture …",libDone:"{0} importées · {1} sans position",
+ libNone:"Aucune image lue",savedShared:"Enregistré et envoyé",dEdit:"Conditions & note",
+ srcLib:"importée",editSaved:"Mis à jour",editRemoteFail:"Modifié en local seulement – serveur injoignable",
+ navCam:"Prise",navMap:"Carte",navArc:"Archive",navSet:"Réglages",sensor:"Capteur",
+ camOff:"Caméra inactive",camStart:"Activer la caméra",
+ camHint:"Touchez « Activer la caméra » et autorisez l'accès.",
+ camDenied:"Accès refusé ou caméra occupée. Autorisez-le dans les réglages du site puis relancez.",
+ camHttps:"La caméra exige HTTPS.",camNotReady:"Caméra pas encore prête",
+ lblPos:"Position",lblAlt:"Altitude",lblDir:"Azimut",
+ waitGps:"attente du GPS",noGps:"appareil sans GPS",denied:"accès refusé",noSignal:"pas de signal",
+ noAlt:"pas d'altitude",noCompass:"pas de boussole",sensorsAsked:"Capteurs demandés",
+ posOk:"Position ✓",posNo:"Position –",compOk:"Boussole ✓",compNo:"Boussole –",
+ mapTitle:"Carte",btnShow:"Afficher",btnLoad:"Charger",btnOffline:"Hors ligne",period:"Période",
+ chipAll:"Tous",chipMine:"Les miens",cnt:"{0} observations",cntBoth:"{0} + {1} observations",
+ nothingRange:"Rien sur cette période",tooBig:"Zone trop vaste",
+ tilesLoading:"Chargement de {0} tuiles",tilesReady:"{0} tuiles hors ligne",
+ noServer:"Aucun serveur configuré",offlineShow:"Hors ligne – observations enregistrées",
+ loadedN:"{0} observations chargées",serverFail:"Serveur injoignable",
+ t0:"24 heures",t1:"2 jours",t2:"3 jours",t3:"1 semaine",t4:"2 semaines",t5:"1 mois",t6:"3 mois",t7:"1 an",t8:"depuis toujours",
+ kSnow:"Neige",kAval:"Avalanche",kTrail:"Sentier",kRock:"Rocher & glace",kWeather:"Météo",kWater:"Eau",kHut:"Refuge",kOther:"Autre",
+ shCond:"Conditions",shDone:"Terminé",shWhat:"Que montre la photo ?",shNote:"Note",
+ shNotePh:"ex. plaque à vent au-dessus de 2200 m, couloir soufflé",
+ shPostAs:"Publier en tant que",shAnon:"Anonyme",shSaveShare:"Enregistrer & partager",shLocal:"Garder en local",shSave:"Enregistrer",
+ shShareHint:"Les observations partagées sont visibles par tous et ne peuvent être supprimées que depuis cet appareil.",
+ savedLocal:"Enregistré",sending:"Envoi …",
+ arcTitle:"Archive",btnExport:"Export",emptyTitle:"Aucune observation.",
+ emptyHint:"Allez sur <b>Prise</b> et appuyez sur le déclencheur.",
+ del:"Supprimer",stShared:"partagé",stWaiting:"en attente",stLocal:"local",deleted:"Supprimé",
+ nothingExp:"Rien à exporter",packing:"Préparation de l'export …",
+ dMine:"Mon observation",dClose:"Fermer",dTime:"Heure",dCond:"Conditions",dNote:"Note",dPos:"Position",
+ dAlt:"Altitude",dDir:"Azimut",dGpsAlt:"Altitude GPS",dAcc:"Précision",dStatus:"État",
+ dSave:"Enregistrer la photo",dShare:"Partager",dToMap:"Sur la carte",dBy:"Par",dMe:"moi",dAnon:"anonyme",
+ dPostBy:"Observation de {0}",dView:"Voir",dTaken:"Prise",
+ setTitle:"Réglages",sLang:"Langue",sLangAuto:"Comme le téléphone",sSensors:"Capteurs",sGrant:"Autoriser",
+ sShare:"Partager les observations",shareOn:"Le partage sera proposé à l'enregistrement.",
+ shareOff:"Les photos restent sur l'appareil.",shareNoSrv:"Aucun serveur – l'application reste locale.",
+ sName:"Nom",hName:"Facultatif. Affiché sur les observations partagées si vous le choisissez. N'utilisez pas votre vrai nom.",
+ sSync:"Synchronisation",sSyncNow:"Envoyer",syncLine:"{0} partagées · {1} en attente · {2} d'autrui",
+ sRange:"Cône – portée",hRange:"{0} m de portée dessinée sur la carte.",
+ sFov:"Cône – ouverture",hFov:"{0}° de champ.",
+ sGeoid:"Ondulation du géoïde N",hGeoid:"Altitude = altitude GPS − N. Dans les Alpes, N vaut environ 47–53 m.",
+ sCalib:"Calage d'altitude",sCalibBtn:"Caler",sCalibNone:"pas encore calé",sCalibAsk:"interrogation …",
+ sCalibDone:"Terrain {0} m · N = {1}",sCalibFail:"modèle d'altitude injoignable",
+ calibWait:"Attente de l'altitude GPS",calibOk:"Altitude calée",
+ sDecl:"Correction boussole",hDecl:"Décalage fixe en degrés ajouté à l'azimut mesuré.",
+ sStorage:"Stockage",sPersist:"Permanent",persistOk:"Stockage protégé",persistNo:"Refusé par l'appareil",
+ quota:"{0} Mo utilisés sur {1} Go",
+ sWipe:"Vider l'archive",sWipeBtn:"Supprimer",sWipeHint:"Supprime toutes les observations de cet appareil.",
+ sWipeAsk:"Supprimer toutes les observations de cet appareil ?",wiped:"Archive vidée",
+ sServer:"Serveur",sAddr:"Adresse",sKey:"Clé anon",
+ hServer:"Normalement déjà renseigné dans index.html. À modifier seulement pour votre propre serveur.",
+ hPrivacy:"Les photos restent d'abord sur l'appareil. Les observations partagées sont visibles par tous les utilisateurs – sans compte ni modération. Ne publiez rien montrant des personnes. Fonds de carte OpenStreetMap."
+},
+it:{
+ libBtn:"Galleria",libBusy:"Lettura …",libDone:"{0} importate · {1} senza posizione",
+ libNone:"Nessuna immagine letta",savedShared:"Salvato e inviato",dEdit:"Condizioni e nota",
+ srcLib:"importata",editSaved:"Aggiornato",editRemoteFail:"Modificato solo in locale – server irraggiungibile",
+ navCam:"Scatto",navMap:"Mappa",navArc:"Archivio",navSet:"Impostazioni",sensor:"Sensore",
+ camOff:"Fotocamera inattiva",camStart:"Avvia fotocamera",
+ camHint:"Tocca « Avvia fotocamera » e consenti l'accesso.",
+ camDenied:"Accesso negato o fotocamera occupata. Consentilo nelle impostazioni del sito e riavvia.",
+ camHttps:"La fotocamera richiede HTTPS.",camNotReady:"Fotocamera non ancora pronta",
+ lblPos:"Posizione",lblAlt:"Quota",lblDir:"Direzione",
+ waitGps:"in attesa del GPS",noGps:"dispositivo senza GPS",denied:"accesso negato",noSignal:"nessun segnale",
+ noAlt:"nessuna quota",noCompass:"nessuna bussola",sensorsAsked:"Sensori richiesti",
+ posOk:"Posizione ✓",posNo:"Posizione –",compOk:"Bussola ✓",compNo:"Bussola –",
+ mapTitle:"Mappa",btnShow:"Mostra",btnLoad:"Carica",btnOffline:"Offline",period:"Periodo",
+ chipAll:"Tutti",chipMine:"Solo miei",cnt:"{0} segnalazioni",cntBoth:"{0} + {1} segnalazioni",
+ nothingRange:"Niente in questo periodo",tooBig:"Area troppo estesa",
+ tilesLoading:"Caricamento di {0} tasselli",tilesReady:"{0} tasselli offline",
+ noServer:"Nessun server configurato",offlineShow:"Offline – segnalazioni salvate",
+ loadedN:"{0} segnalazioni caricate",serverFail:"Server irraggiungibile",
+ t0:"24 ore",t1:"2 giorni",t2:"3 giorni",t3:"1 settimana",t4:"2 settimane",t5:"1 mese",t6:"3 mesi",t7:"1 anno",t8:"da sempre",
+ kSnow:"Neve",kAval:"Valanga",kTrail:"Sentiero",kRock:"Roccia e ghiaccio",kWeather:"Meteo",kWater:"Acqua",kHut:"Rifugio",kOther:"Altro",
+ shCond:"Condizioni",shDone:"Fatto",shWhat:"Cosa mostra la foto?",shNote:"Nota",
+ shNotePh:"es. lastroni da vento sopra 2200 m, canale spazzato",
+ shPostAs:"Pubblica come",shAnon:"Anonimo",shSaveShare:"Salva e condividi",shLocal:"Solo in locale",shSave:"Salva",
+ shShareHint:"Le segnalazioni condivise sono visibili a tutti e si possono cancellare solo da questo dispositivo.",
+ savedLocal:"Salvato",sending:"Invio …",
+ arcTitle:"Archivio",btnExport:"Esporta",emptyTitle:"Ancora nessuna segnalazione.",
+ emptyHint:"Vai su <b>Scatto</b> e premi il pulsante.",
+ del:"Elimina",stShared:"condivisa",stWaiting:"in attesa",stLocal:"locale",deleted:"Eliminato",
+ nothingExp:"Niente da esportare",packing:"Preparazione export …",
+ dMine:"La mia segnalazione",dClose:"Chiudi",dTime:"Ora",dCond:"Condizioni",dNote:"Nota",dPos:"Posizione",
+ dAlt:"Quota",dDir:"Direzione",dGpsAlt:"Quota GPS",dAcc:"Precisione",dStatus:"Stato",
+ dSave:"Salva foto",dShare:"Condividi",dToMap:"Sulla mappa",dBy:"Di",dMe:"me",dAnon:"anonimo",
+ dPostBy:"Segnalazione di {0}",dView:"Apri",dTaken:"Scattata",
+ setTitle:"Impostazioni",sLang:"Lingua",sLangAuto:"Come il telefono",sSensors:"Sensori",sGrant:"Consenti",
+ sShare:"Condividi segnalazioni",shareOn:"Al salvataggio verrà proposta la condivisione.",
+ shareOff:"Le foto restano sul dispositivo.",shareNoSrv:"Nessun server – l'app funziona solo in locale.",
+ sName:"Nome",hName:"Facoltativo. Compare sulle segnalazioni condivise se lo scegli al salvataggio. Non usare il nome reale.",
+ sSync:"Sincronizzazione",sSyncNow:"Invia ora",syncLine:"{0} condivise · {1} in attesa · {2} altrui",
+ sRange:"Cono – portata",hRange:"{0} m di portata disegnati sulla mappa.",
+ sFov:"Cono – apertura",hFov:"{0}° di campo visivo.",
+ sGeoid:"Ondulazione del geoide N",hGeoid:"Quota = quota GPS − N. Sulle Alpi orientali N vale circa 47–51 m.",
+ sCalib:"Taratura quota",sCalibBtn:"Tara",sCalibNone:"non ancora tarata",sCalibAsk:"interrogazione …",
+ sCalibDone:"Terreno {0} m · N = {1}",sCalibFail:"modello altimetrico irraggiungibile",
+ calibWait:"Attendo la quota GPS",calibOk:"Quota tarata",
+ sDecl:"Correzione bussola",hDecl:"Scostamento fisso in gradi aggiunto alla direzione misurata.",
+ sStorage:"Memoria",sPersist:"Permanente",persistOk:"Memoria protetta",persistNo:"Dispositivo ha rifiutato",
+ quota:"{0} MB usati su {1} GB",
+ sWipe:"Svuota archivio",sWipeBtn:"Elimina",sWipeHint:"Elimina tutte le segnalazioni su questo dispositivo.",
+ sWipeAsk:"Eliminare tutte le segnalazioni su questo dispositivo?",wiped:"Archivio svuotato",
+ sServer:"Server",sAddr:"Indirizzo",sKey:"Chiave anon",
+ hServer:"Di norma sono già in index.html. Cambiali solo se usi un server tuo.",
+ hPrivacy:"Le foto restano prima di tutto sul dispositivo. Le segnalazioni condivise sono visibili a chiunque usi l'app – senza registrazione né moderazione. Non caricare immagini con persone. Mappe di OpenStreetMap."
+},
+es:{
+ libBtn:"Galería",libBusy:"Leyendo …",libDone:"{0} importadas · {1} sin posición",
+ libNone:"No se leyó ninguna imagen",savedShared:"Guardado y enviado",dEdit:"Condiciones y nota",
+ srcLib:"importada",editSaved:"Actualizado",editRemoteFail:"Cambiado solo en local – servidor inaccesible",
+ navCam:"Captura",navMap:"Mapa",navArc:"Archivo",navSet:"Ajustes",sensor:"Sensor",
+ camOff:"Cámara inactiva",camStart:"Activar cámara",
+ camHint:"Toca « Activar cámara » y permite el acceso.",
+ camDenied:"Acceso denegado o cámara ocupada. Permítelo en los ajustes del sitio y reinicia.",
+ camHttps:"La cámara necesita HTTPS.",camNotReady:"Cámara aún no lista",
+ lblPos:"Posición",lblAlt:"Altitud",lblDir:"Rumbo",
+ waitGps:"esperando GPS",noGps:"dispositivo sin GPS",denied:"acceso denegado",noSignal:"sin señal",
+ noAlt:"sin altitud",noCompass:"sin brújula",sensorsAsked:"Sensores solicitados",
+ posOk:"Posición ✓",posNo:"Posición –",compOk:"Brújula ✓",compNo:"Brújula –",
+ mapTitle:"Mapa",btnShow:"Mostrar",btnLoad:"Cargar",btnOffline:"Sin red",period:"Periodo",
+ chipAll:"Todos",chipMine:"Solo míos",cnt:"{0} avisos",cntBoth:"{0} + {1} avisos",
+ nothingRange:"Nada en este periodo",tooBig:"Área demasiado grande",
+ tilesLoading:"Cargando {0} teselas",tilesReady:"{0} teselas sin conexión",
+ noServer:"Sin servidor configurado",offlineShow:"Sin red – avisos guardados",
+ loadedN:"{0} avisos cargados",serverFail:"Servidor inaccesible",
+ t0:"24 horas",t1:"2 días",t2:"3 días",t3:"1 semana",t4:"2 semanas",t5:"1 mes",t6:"3 meses",t7:"1 año",t8:"desde siempre",
+ kSnow:"Nieve",kAval:"Alud",kTrail:"Sendero",kRock:"Roca y hielo",kWeather:"Tiempo",kWater:"Agua",kHut:"Refugio",kOther:"Otro",
+ shCond:"Condiciones",shDone:"Listo",shWhat:"¿Qué muestra la foto?",shNote:"Nota",
+ shNotePh:"p. ej. placa de viento sobre 2200 m, canal barrido",
+ shPostAs:"Publicar como",shAnon:"Anónimo",shSaveShare:"Guardar y compartir",shLocal:"Solo local",shSave:"Guardar",
+ shShareHint:"Los avisos compartidos son visibles para todos y solo se pueden borrar desde este dispositivo.",
+ savedLocal:"Guardado",sending:"Enviando …",
+ arcTitle:"Archivo",btnExport:"Exportar",emptyTitle:"Aún no hay avisos.",
+ emptyHint:"Ve a <b>Captura</b> y pulsa el disparador.",
+ del:"Borrar",stShared:"compartido",stWaiting:"pendiente",stLocal:"local",deleted:"Borrado",
+ nothingExp:"Nada que exportar",packing:"Preparando exportación …",
+ dMine:"Mi aviso",dClose:"Cerrar",dTime:"Hora",dCond:"Condiciones",dNote:"Nota",dPos:"Posición",
+ dAlt:"Altitud",dDir:"Rumbo",dGpsAlt:"Altitud GPS",dAcc:"Precisión",dStatus:"Estado",
+ dSave:"Guardar foto",dShare:"Compartir",dToMap:"En el mapa",dBy:"De",dMe:"mí",dAnon:"anónimo",
+ dPostBy:"Aviso de {0}",dView:"Ver",dTaken:"Tomada",
+ setTitle:"Ajustes",sLang:"Idioma",sLangAuto:"Como el teléfono",sSensors:"Sensores",sGrant:"Permitir",
+ sShare:"Compartir avisos",shareOn:"Al guardar se ofrecerá compartir.",
+ shareOff:"Las fotos se quedan en el dispositivo.",shareNoSrv:"Sin servidor – la app funciona solo en local.",
+ sName:"Nombre",hName:"Opcional. Aparece en los avisos compartidos si lo eliges al guardar. No uses tu nombre real.",
+ sSync:"Sincronización",sSyncNow:"Enviar ahora",syncLine:"{0} compartidos · {1} pendientes · {2} de otros",
+ sRange:"Cono – alcance",hRange:"{0} m de alcance dibujados en el mapa.",
+ sFov:"Cono – apertura",hFov:"{0}° de campo visual.",
+ sGeoid:"Ondulación del geoide N",hGeoid:"Altitud = altitud GPS − N. En los Alpes orientales N ronda 47–51 m.",
+ sCalib:"Ajuste de altitud",sCalibBtn:"Ajustar",sCalibNone:"sin ajustar",sCalibAsk:"consultando …",
+ sCalibDone:"Terreno {0} m · N = {1}",sCalibFail:"modelo de elevación inaccesible",
+ calibWait:"Esperando altitud GPS",calibOk:"Altitud ajustada",
+ sDecl:"Corrección de brújula",hDecl:"Desfase fijo en grados añadido al rumbo medido.",
+ sStorage:"Almacenamiento",sPersist:"Permanente",persistOk:"Almacenamiento protegido",persistNo:"El dispositivo lo rechazó",
+ quota:"{0} MB usados de {1} GB",
+ sWipe:"Vaciar archivo",sWipeBtn:"Borrar",sWipeHint:"Borra todos los avisos de este dispositivo.",
+ sWipeAsk:"¿Borrar todos los avisos de este dispositivo?",wiped:"Archivo vaciado",
+ sServer:"Servidor",sAddr:"Dirección",sKey:"Clave anon",
+ hServer:"Normalmente ya están en index.html. Cámbialos solo si usas tu propio servidor.",
+ hPrivacy:"Las fotos se quedan primero en el dispositivo. Los avisos compartidos son visibles para cualquiera que use la app – sin cuenta ni moderación. No subas imágenes con personas. Mapas de OpenStreetMap."
+}
+};
+
+const KATS = [["snow","kSnow"],["aval","kAval"],["trail","kTrail"],["rock","kRock"],
+              ["weather","kWeather"],["water","kWater"],["hut","kHut"],["other","kOther"]];
+const KATKEY = Object.fromEntries(KATS);
+
+/* =========================================================
+   Werkzeug
    ========================================================= */
 const $ = s => document.querySelector(s);
-const D2R = Math.PI/180, R2D = 180/Math.PI, EARTH = 6371008.8;
-const pad = (n,l=2) => String(n).padStart(l,"0");
+const D2R=Math.PI/180, R2D=180/Math.PI, EARTH=6371008.8;
+const pad=(n,l=2)=>String(n).padStart(l,"0");
+const esc=s=>String(s||"").replace(/[<>&"]/g,c=>({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;"}[c]));
 let toastT;
-function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("on");
-  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("on"),2300); }
-
+function toast(m){ const t=$("#toast"); t.textContent=m; t.classList.add("on");
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("on"),2400); }
 function destPoint(lat,lon,brg,dist){
-  const d=dist/EARTH, b=brg*D2R, p1=lat*D2R, l1=lon*D2R;
+  const d=dist/EARTH,b=brg*D2R,p1=lat*D2R,l1=lon*D2R;
   const p2=Math.asin(Math.sin(p1)*Math.cos(d)+Math.cos(p1)*Math.sin(d)*Math.cos(b));
-  const l2=l1+Math.atan2(Math.sin(b)*Math.sin(d)*Math.cos(p1), Math.cos(d)-Math.sin(p1)*Math.sin(p2));
+  const l2=l1+Math.atan2(Math.sin(b)*Math.sin(d)*Math.cos(p1),Math.cos(d)-Math.sin(p1)*Math.sin(p2));
   return [p2*R2D, ((l2*R2D+540)%360)-180];
 }
-const CARD = ["N","NNO","NO","ONO","O","OSO","SO","SSO","S","SSW","SW","WSW","W","WNW","NW","NNW"];
-const cardinal = d => CARD[Math.round(((d%360)+360)%360/22.5)%16];
-function fmtCoord(lat,lon){ return lat.toFixed(6)+"°, "+lon.toFixed(6)+"°"; }
-function stamp(ts){ const d=new Date(ts);
-  return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+" "+pad(d.getHours())+":"+pad(d.getMinutes()); }
-function fileStamp(ts){ const d=new Date(ts);
-  return ""+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+"-"+pad(d.getHours())+pad(d.getMinutes())+pad(d.getSeconds()); }
+const CARD_EN=["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"];
+const CARD_DE=["N","NNO","NO","ONO","O","OSO","SO","SSO","S","SSW","SW","WSW","W","WNW","NW","NNW"];
+const cardinal=d=>(LANG==="de"?CARD_DE:CARD_EN)[Math.round(((d%360)+360)%360/22.5)%16];
+const fmtCoord=(a,b)=>a.toFixed(6)+"°, "+b.toFixed(6)+"°";
+function stamp(ts){const d=new Date(ts);
+  return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+" "+pad(d.getHours())+":"+pad(d.getMinutes());}
+function fileStamp(ts){const d=new Date(ts);
+  return ""+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+"-"+pad(d.getHours())+pad(d.getMinutes())+pad(d.getSeconds());}
+const uid = () => crypto.randomUUID ? crypto.randomUUID()
+  : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,c=>{
+      const r=Math.random()*16|0; return (c==="x"?r:(r&3|8)).toString(16);});
 
 /* =========================================================
-   Einstellungen
+   Einstellungen und Sprache
    ========================================================= */
-const SET = Object.assign({ range:80, fov:40, geoid:46, decl:0 },
-  JSON.parse(localStorage.getItem("feldblick.set")||"{}"));
-const saveSet = () => localStorage.setItem("feldblick.set", JSON.stringify(SET));
+const OLD = localStorage.getItem("hangblick.set") || localStorage.getItem("feldblick.set");
+const SET = Object.assign(
+  { range:400, fov:40, geoid:48, decl:0, share:false, autor:"", postAs:"anon", tIdx:2, onlyMine:false,
+    lang:"auto", cloudUrl:CLOUD_DEFAULT.url, cloudKey:CLOUD_DEFAULT.key },
+  JSON.parse(localStorage.getItem("aspect.set") || OLD || "{}"));
+if(CLOUD_DEFAULT.url) SET.cloudUrl = CLOUD_DEFAULT.url;
+if(CLOUD_DEFAULT.key) SET.cloudKey = CLOUD_DEFAULT.key;
+const saveSet = () => localStorage.setItem("aspect.set", JSON.stringify(SET));
+
+let LANG = "en", RTF = null;
+function pickLang(){
+  if(SET.lang && SET.lang!=="auto" && I18N[SET.lang]) return SET.lang;
+  for(const c of (navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language||"en"])){
+    const l=String(c).slice(0,2).toLowerCase();
+    if(I18N[l]) return l;
+  }
+  return "en";
+}
+function T(k){
+  let s = (I18N[LANG] && I18N[LANG][k]) || I18N.en[k] || k;
+  for(let i=1;i<arguments.length;i++) s = s.split("{"+(i-1)+"}").join(arguments[i]);
+  return s;
+}
+const KATL = id => T(KATKEY[id] || "kOther");
+function setLang(){
+  LANG = pickLang();
+  document.documentElement.lang = LANG;
+  try{ RTF = new Intl.RelativeTimeFormat(LANG,{numeric:"auto"}); }catch(e){ RTF=null; }
+  document.querySelectorAll("[data-i18n]").forEach(el=>{
+    const v=T(el.dataset.i18n);
+    if(/<[a-z]/i.test(v)) el.innerHTML=v; else el.textContent=v;
+  });
+  $("#setLang").options[0].textContent = T("sLangAuto");
+}
+function ago(ts){
+  const min=(Date.now()-ts)/60000;
+  if(!RTF) return Math.round(min)+" min";
+  if(min<60) return RTF.format(-Math.max(1,Math.round(min)),"minute");
+  if(min<48*60) return RTF.format(-Math.round(min/60),"hour");
+  return RTF.format(-Math.round(min/1440),"day");
+}
+const TSTEPS=[24,48,72,168,336,720,2160,8760,null];
+const tLabel = i => T("t"+i);
 
 /* =========================================================
-   Datenbank (IndexedDB)
+   Datenbank  (Name bleibt, damit alte Aufnahmen erhalten bleiben)
    ========================================================= */
 const DB = (()=>{
   let db;
   function open(){ return new Promise((res,rej)=>{
     if(db) return res(db);
-    const rq = indexedDB.open("feldblick",1);
-    rq.onupgradeneeded = e => { const d=e.target.result;
-      const s=d.createObjectStore("shots",{keyPath:"id"}); s.createIndex("ts","ts"); };
-    rq.onsuccess = e => { db=e.target.result; res(db); };
-    rq.onerror = () => rej(rq.error);
+    const rq=indexedDB.open("feldblick",2);
+    rq.onupgradeneeded=e=>{ const d=e.target.result;
+      if(!d.objectStoreNames.contains("shots")){ const s=d.createObjectStore("shots",{keyPath:"id"}); s.createIndex("ts","ts"); }
+      if(!d.objectStoreNames.contains("fremde")){ const f=d.createObjectStore("fremde",{keyPath:"id"}); f.createIndex("ts","ts"); } };
+    rq.onsuccess=e=>{ db=e.target.result; res(db); };
+    rq.onerror=()=>rej(rq.error);
   });}
-  const tx = (mode,fn) => open().then(d => new Promise((res,rej)=>{
-    const t=d.transaction("shots",mode), s=t.objectStore("shots"); let out;
-    out = fn(s); t.oncomplete=()=>res(out&&out.result!==undefined?out.result:out); t.onerror=()=>rej(t.error);
+  const tx=(store,mode,fn)=>open().then(d=>new Promise((res,rej)=>{
+    const t=d.transaction(store,mode), s=t.objectStore(store), out=fn(s);
+    t.oncomplete=()=>res(out&&out.result!==undefined?out.result:out);
+    t.onerror=()=>rej(t.error);
   }));
-  return {
-    add: rec => tx("readwrite", s=>s.add(rec)),
-    all: () => tx("readonly", s=>s.index("ts").getAll()),
-    del: id => tx("readwrite", s=>s.delete(id)),
-    clear: () => tx("readwrite", s=>s.clear())
-  };
+  return { put:(s,r)=>tx(s,"readwrite",o=>o.put(r)), get:(s,i)=>tx(s,"readonly",o=>o.get(i)),
+    all:s=>tx(s,"readonly",o=>o.index("ts").getAll()), del:(s,i)=>tx(s,"readwrite",o=>o.delete(i)),
+    clear:s=>tx(s,"readwrite",o=>o.clear()) };
 })();
 
 /* =========================================================
-   Sensoren: Position + Richtung
+   Sensoren
    ========================================================= */
-const S = { lat:null, lon:null, acc:null, altEll:null, altAcc:null, posTs:0,
-            heading:null, tilt:null, headOk:false, headTs:0 };
-
+const S={lat:null,lon:null,acc:null,altEll:null,altAcc:null,posTs:0,heading:null,tilt:null,headOk:false,headTs:0};
 let geoWatch=null;
 function startGeo(){
-  if(!navigator.geolocation){ $("#rPosS").textContent="Gerät ohne GPS"; return; }
+  if(!navigator.geolocation){ $("#rPosS").textContent=T("noGps"); return; }
   if(geoWatch!==null) navigator.geolocation.clearWatch(geoWatch);
-  geoWatch = navigator.geolocation.watchPosition(p=>{
+  geoWatch=navigator.geolocation.watchPosition(p=>{
     S.lat=p.coords.latitude; S.lon=p.coords.longitude; S.acc=p.coords.accuracy;
-    S.altEll=p.coords.altitude; S.altAcc=p.coords.altitudeAccuracy; S.posTs=Date.now();
-    paintReadout();
-  }, err=>{
-    $("#rPosS").textContent = err.code===1 ? "Zugriff verweigert" : "kein Signal";
-    $("#rPos").parentElement.classList.add("stale");
-  }, {enableHighAccuracy:true, maximumAge:1000, timeout:20000});
+    S.altEll=p.coords.altitude; S.altAcc=p.coords.altitudeAccuracy; S.posTs=Date.now(); paintReadout();
+  }, err=>{ $("#rPosS").textContent = err.code===1?T("denied"):T("noSignal"); },
+  {enableHighAccuracy:true,maximumAge:1000,timeout:20000});
 }
-
-/* Richtung der Rückkamera aus der Geräte-Lage.
-   W3C-Rotationsmatrix R = Rz(alpha)·Rx(beta)·Ry(gamma), Kamera zeigt entlang der Geräte-(−z)-Achse. */
 function headingFrom(alpha,beta,gamma){
   if(alpha==null||beta==null||gamma==null) return null;
-  const x=beta*D2R, y=gamma*D2R, z=alpha*D2R;
+  const x=beta*D2R,y=gamma*D2R,z=alpha*D2R;
   const cX=Math.cos(x),cY=Math.cos(y),cZ=Math.cos(z),sX=Math.sin(x),sY=Math.sin(y),sZ=Math.sin(z);
-  const r13 = cY*sZ*sX + cZ*sY, r23 = sZ*sY - cZ*cY*sX, r33 = cX*cY;   // Geräte-z-Achse in Weltkoordinaten
-  const r12 = -cX*sZ,          r22 = cZ*cX,             r32 = sX;      // Geräte-y-Achse (Oberkante)
-  let e=-r13, n=-r23;                       // Blickrichtung = −z
-  const up = -r33;                           // Vertikalanteil der Blickrichtung
-  if(Math.abs(up) > 0.985){ e = r12; n = r22; }   // fast senkrecht: Oberkante als Ersatz
-  const h = (Math.atan2(e,n)*R2D + 360) % 360;
-  return { heading:h, tilt:Math.asin(Math.max(-1,Math.min(1,up)))*R2D };
+  const r13=cY*sZ*sX+cZ*sY, r23=sZ*sY-cZ*cY*sX, r33=cX*cY, r12=-cX*sZ, r22=cZ*cX;
+  let e=-r13, n=-r23; const up=-r33;
+  if(Math.abs(up)>0.985){ e=r12; n=r22; }
+  return { heading:(Math.atan2(e,n)*R2D+360)%360, tilt:Math.asin(Math.max(-1,Math.min(1,up)))*R2D };
 }
-
-/* Zirkulärer gleitender Mittelwert gegen Kompasszittern */
 const buf=[];
 function pushHeading(h,tilt){
   buf.push(h); if(buf.length>8) buf.shift();
   let sx=0,sy=0; for(const a of buf){ sx+=Math.cos(a*D2R); sy+=Math.sin(a*D2R); }
-  S.heading = ((Math.atan2(sy,sx)*R2D + SET.decl)%360+360)%360;
-  S.tilt = tilt; S.headTs = Date.now(); S.headOk = true;
-  paintTape(); paintReadout();
+  S.heading=((Math.atan2(sy,sx)*R2D+SET.decl)%360+360)%360;
+  S.tilt=tilt; S.headTs=Date.now(); S.headOk=true; paintTape(); paintReadout();
 }
-
 function onOrient(e){
-  if(e.webkitCompassHeading != null && !isNaN(e.webkitCompassHeading)){
-    const r = headingFrom(360 - e.webkitCompassHeading, e.beta, e.gamma);
-    if(r) pushHeading(r.heading, r.tilt);
-    return;
-  }
-  if(e.absolute === false && !e.__forced) return;   // relative Daten sind für Peilung wertlos
-  const r = headingFrom(e.alpha, e.beta, e.gamma);
-  if(r) pushHeading(r.heading, r.tilt);
+  if(e.webkitCompassHeading!=null && !isNaN(e.webkitCompassHeading)){
+    const r=headingFrom(360-e.webkitCompassHeading,e.beta,e.gamma); if(r) pushHeading(r.heading,r.tilt); return; }
+  if(e.absolute===false && !e.__forced) return;
+  const r=headingFrom(e.alpha,e.beta,e.gamma); if(r) pushHeading(r.heading,r.tilt);
 }
 function startOrient(){
-  window.addEventListener("deviceorientationabsolute", onOrient, true);
-  window.addEventListener("deviceorientation", ev=>{ ev.__forced = (ev.absolute!==false); onOrient(ev); }, true);
+  window.addEventListener("deviceorientationabsolute",onOrient,true);
+  window.addEventListener("deviceorientation",ev=>{ev.__forced=(ev.absolute!==false);onOrient(ev);},true);
 }
-
 async function askPermissions(){
-  try{
-    if(typeof DeviceOrientationEvent!=="undefined" && DeviceOrientationEvent.requestPermission){
-      await DeviceOrientationEvent.requestPermission();
-    }
-  }catch(e){}
-  startOrient(); startGeo();
-  setTimeout(paintSensState, 1200);
-  toast("Sensoren angefragt");
+  try{ if(typeof DeviceOrientationEvent!=="undefined" && DeviceOrientationEvent.requestPermission)
+    await DeviceOrientationEvent.requestPermission(); }catch(e){}
+  startOrient(); startGeo(); setTimeout(paintSensState,1200); toast(T("sensorsAsked"));
 }
-function paintSensState(){
-  const g = S.lat!=null ? "Position ✓" : "Position –";
-  const c = S.headOk ? "Kompass ✓" : "Kompass –";
-  $("#sensState").textContent = g+"   "+c;
-}
+const paintSensState = () =>
+  $("#sensState").textContent = (S.lat!=null?T("posOk"):T("posNo"))+"   "+(S.headOk?T("compOk"):T("compNo"));
 
 /* =========================================================
-   Anzeige: Peilband + Messwerte
+   Anzeige
    ========================================================= */
-const PXDEG = 5.2;
-(function buildTape(){
-  const inner=$("#tapeInner"), f=document.createDocumentFragment();
-  for(let d=-180; d<=540; d+=5){
-    const dd=((d%360)+360)%360, major = dd%45===0;
+const PXDEG=5.2;
+let tapeBuilt=false;
+function buildTape(){
+  const inner=$("#tapeInner"); inner.innerHTML="";
+  const f=document.createDocumentFragment();
+  for(let d=-180;d<=540;d+=5){ const dd=((d%360)+360)%360,major=dd%45===0;
     const t=document.createElement("div"); t.className="tick"+(major?" major":"");
     t.style.left=(d*PXDEG)+"px"; f.appendChild(t);
     if(major){ const l=document.createElement("div"); l.className="tlabel"+(dd%90===0?" card":"");
-      l.style.left=(d*PXDEG)+"px"; l.textContent=cardinal(dd); f.appendChild(l); }
-  }
-  inner.appendChild(f);
-})();
-function paintTape(){
-  if(S.heading==null) return;
-  $("#tapeInner").style.transform = "translateX("+(-S.heading*PXDEG)+"px)";
-  $("#tapeVal").textContent = Math.round(S.heading)+"°";
+      l.style.left=(d*PXDEG)+"px"; l.textContent=cardinal(dd); f.appendChild(l);} }
+  inner.appendChild(f); tapeBuilt=true;
 }
-function altMsl(){ return S.altEll==null ? null : S.altEll - SET.geoid; }
+function paintTape(){ if(!tapeBuilt||S.heading==null) return;
+  $("#tapeInner").style.transform="translateX("+(-S.heading*PXDEG)+"px)";
+  $("#tapeVal").textContent=Math.round(S.heading)+"°"; }
+const altMsl = () => S.altEll==null ? null : S.altEll-SET.geoid;
 function paintReadout(){
-  const fresh = Date.now()-S.posTs < 12000;
-  $("#rPos").parentElement.classList.toggle("stale", !fresh);
-  if(S.lat!=null){
-    $("#rPos").textContent = S.lat.toFixed(5)+" / "+S.lon.toFixed(5);
-    $("#rPosS").textContent = "± "+Math.round(S.acc)+" m";
-  }
-  const a = altMsl();
-  $("#rAlt").textContent = a==null ? "–" : a.toFixed(1)+" m";
-  $("#rAltS").textContent = a==null ? "keine Höhe" : (S.altAcc!=null?"± "+Math.round(S.altAcc)+" m":"GPS")+" · N "+SET.geoid;
-  const hd = $("#rDir").parentElement;
-  hd.classList.toggle("stale", Date.now()-S.headTs > 4000);
-  $("#rDir").textContent = S.heading==null ? "–" : Math.round(S.heading)+"°";
-  $("#rDirS").textContent = S.heading==null ? "kein Kompass"
-    : cardinal(S.heading)+(S.tilt!=null?" · "+(S.tilt>0?"+":"")+S.tilt.toFixed(0)+"° Neigung":"");
-  $("#satN").textContent = S.acc!=null ? Math.round(S.acc) : "GPS";
-  $("#shutter").disabled = false;
+  const fresh=Date.now()-S.posTs<12000;
+  $("#rPos").parentElement.classList.toggle("stale",!fresh);
+  if(S.lat!=null){ $("#rPos").textContent=S.lat.toFixed(5)+" / "+S.lon.toFixed(5);
+    $("#rPosS").textContent="± "+Math.round(S.acc)+" m"; }
+  else if(!$("#rPosS").textContent) $("#rPosS").textContent=T("waitGps");
+  const a=altMsl();
+  $("#rAlt").textContent = a==null?"–":a.toFixed(0)+" m";
+  $("#rAltS").textContent = a==null?T("noAlt"):(S.altAcc!=null?"± "+Math.round(S.altAcc)+" m":"GPS");
+  $("#rDir").parentElement.classList.toggle("stale",Date.now()-S.headTs>4000);
+  $("#rDir").textContent = S.heading==null?"–":Math.round(S.heading)+"°";
+  $("#rDirS").textContent = S.heading==null?T("noCompass")
+    : cardinal(S.heading)+(S.tilt!=null?" · "+(S.tilt>0?"+":"")+S.tilt.toFixed(0)+"°":"");
+  $("#satN").textContent = S.acc!=null?Math.round(S.acc):"GPS";
 }
-setInterval(paintReadout, 2000);
+setInterval(paintReadout,2000);
 
 /* =========================================================
    Kamera
@@ -1123,410 +1426,692 @@ setInterval(paintReadout, 2000);
 let stream=null;
 async function startCamera(){
   try{
-    stream = await navigator.mediaDevices.getUserMedia({
-      video:{ facingMode:{ideal:"environment"}, width:{ideal:2560}, height:{ideal:1440} }, audio:false });
-    $("#video").srcObject = stream; $("#noCam").style.display="none";
+    stream=await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:{ideal:"environment"},width:{ideal:2560},height:{ideal:1440}},audio:false});
+    $("#video").srcObject=stream; $("#noCam").style.display="none";
   }catch(err){
     $("#noCam").style.display="flex";
-    $("#noCamTxt").textContent = location.protocol==="https:"||location.hostname==="localhost"
-      ? "Kamerazugriff abgelehnt oder belegt. Erlaube ihn in den Website-Einstellungen und starte neu."
-      : "Die Kamera braucht HTTPS. Rufe die App über eine https-Adresse auf.";
+    $("#noCamTxt").textContent = (location.protocol==="https:"||location.hostname==="localhost")
+      ? T("camDenied") : T("camHttps");
   }
 }
-document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible" && !stream) startCamera(); });
-
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible"&&!stream) startCamera(); });
+async function shrink(blob,maxPx,q){
+  const bmp=await createImageBitmap(blob);
+  const s=Math.min(1,maxPx/Math.max(bmp.width,bmp.height));
+  const c=document.createElement("canvas");
+  c.width=Math.round(bmp.width*s); c.height=Math.round(bmp.height*s);
+  c.getContext("2d").drawImage(bmp,0,0,c.width,c.height); bmp.close();
+  return new Promise(r=>c.toBlob(r,"image/jpeg",q));
+}
 async function capture(){
   if(!stream){ startCamera(); return; }
   const v=$("#video");
-  if(!v.videoWidth){ toast("Kamera noch nicht bereit"); return; }
+  if(!v.videoWidth){ toast(T("camNotReady")); return; }
   $("#flash").style.opacity=".85"; setTimeout(()=>$("#flash").style.opacity="0",120);
-
   const c=document.createElement("canvas"); c.width=v.videoWidth; c.height=v.videoHeight;
   c.getContext("2d").drawImage(v,0,0);
-  const raw = await new Promise(r=>c.toBlob(r,"image/jpeg",.88));
-
-  const rec = { id:(crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random())),
-    ts:Date.now(), lat:S.lat, lon:S.lon, acc:S.acc,
+  const raw=await new Promise(r=>c.toBlob(r,"image/jpeg",.88));
+  const rec={ id:uid(), ts:Date.now(), lat:S.lat, lon:S.lon, acc:S.acc,
     altEll:S.altEll, altMsl:altMsl(), altAcc:S.altAcc, geoid:SET.geoid,
-    heading:S.heading, tilt:S.tilt, w:c.width, h:c.height, note:"" };
-
-  rec.blob = await withExif(raw, rec);
-  rec.thumb = await makeThumb(raw);
-  await DB.add(rec);
-  $("#lastthumb").src = URL.createObjectURL(rec.thumb);
-  addToMap(rec); refreshList();
-  toast(rec.lat==null ? "Foto ohne Position gespeichert"
-      : "Gespeichert · "+(rec.heading!=null?Math.round(rec.heading)+"°":"ohne Richtung"));
+    heading:S.heading, tilt:S.tilt, w:c.width, h:c.height,
+    kategorie:"other", notiz:"", autor:autorNow(), geheim:uid(),
+    sync:(SET.share && cloudReady() && S.lat!=null) ? 1 : 0, quelle:"cam" };
+  rec.blob=await withExif(raw,rec);
+  rec.thumb=await shrink(raw,240,.72);
+  await DB.put("shots",rec);
+  $("#lastthumb").src=URL.createObjectURL(rec.thumb);
+  refreshList(); renderMap();
+  if(rec.sync===1){ toast(T("savedShared")); pushPending(); } else toast(T("savedLocal"));
 }
-async function makeThumb(blob){
-  const bmp = await createImageBitmap(blob);
-  const s = 220/Math.max(bmp.width,bmp.height);
-  const c = document.createElement("canvas"); c.width=Math.round(bmp.width*s); c.height=Math.round(bmp.height*s);
-  c.getContext("2d").drawImage(bmp,0,0,c.width,c.height); bmp.close();
-  return new Promise(r=>c.toBlob(r,"image/jpeg",.72));
+const autorNow = () => (SET.postAs==="name" && SET.autor) ? SET.autor : "";
+
+/* =========================================================
+   EXIF lesen  (Import aus der Bilderbibliothek)
+   ========================================================= */
+function tiffRead(dv, base){
+  const le = dv.getUint16(base) === 0x4949;
+  if(dv.getUint16(base+2, le) !== 42) return null;
+  const out = { ifd0:{}, exif:{}, gps:{} };
+  const readIfd = (off, into) => {
+    if(!off || base+off+2 > dv.byteLength) return;
+    const n = dv.getUint16(base+off, le);
+    for(let i=0;i<n;i++){
+      const p = base+off+2+i*12;
+      if(p+12 > dv.byteLength) return;
+      const tag=dv.getUint16(p,le), type=dv.getUint16(p+2,le), count=dv.getUint32(p+4,le);
+      const sz = ({1:1,2:1,3:2,4:4,5:8,7:1,9:4,10:8})[type] || 1;
+      const total = sz*count;
+      if(count > 65535) continue;
+      const vo = total>4 ? base+dv.getUint32(p+8,le) : p+8;
+      if(vo < 0 || vo+total > dv.byteLength) continue;
+      let val;
+      if(type===2){
+        let s=""; for(let k=0;k<count;k++){ const c=dv.getUint8(vo+k); if(!c) break; s+=String.fromCharCode(c); }
+        val = s;
+      } else if(type===5 || type===10){
+        val=[]; for(let k=0;k<count;k++){
+          const num = type===5 ? dv.getUint32(vo+k*8,le)   : dv.getInt32(vo+k*8,le);
+          const den = type===5 ? dv.getUint32(vo+k*8+4,le) : dv.getInt32(vo+k*8+4,le);
+          val.push(den ? num/den : 0);
+        }
+      } else if(type===3){ val=[]; for(let k=0;k<count;k++) val.push(dv.getUint16(vo+k*2,le)); }
+      else if(type===4){ val=[]; for(let k=0;k<count;k++) val.push(dv.getUint32(vo+k*4,le)); }
+      else { val=[]; for(let k=0;k<count;k++) val.push(dv.getUint8(vo+k)); }
+      into[tag]=val;
+    }
+  };
+  readIfd(dv.getUint32(base+4, le), out.ifd0);
+  if(out.ifd0[0x8769]) readIfd(out.ifd0[0x8769][0], out.exif);
+  if(out.ifd0[0x8825]) readIfd(out.ifd0[0x8825][0], out.gps);
+  return out;
+}
+
+function findExif(dv){
+  if(dv.getUint16(0) !== 0xFFD8) return null;
+  let off = 2;
+  while(off+4 <= dv.byteLength){
+    const marker = dv.getUint16(off);
+    if((marker & 0xFF00) !== 0xFF00) break;
+    if(marker === 0xFFDA || marker === 0xFFD9) break;
+    const size = dv.getUint16(off+2);
+    if(size < 2) break;
+    if(marker === 0xFFE1 && off+10 <= dv.byteLength
+       && dv.getUint32(off+4) === 0x45786966 && dv.getUint16(off+8) === 0)
+      return tiffRead(dv, off+10);
+    off += 2 + size;
+  }
+  return null;
+}
+
+function exifToRec(tags){
+  if(!tags) return null;
+  const g=tags.gps||{}, e=tags.exif||{}, z=tags.ifd0||{};
+  const dms = a => (a && a.length>=3) ? a[0] + a[1]/60 + a[2]/3600 : null;
+  const ref = v => (typeof v === "string" ? v : "").trim().toUpperCase();
+  const out = { lat:null, lon:null, altMsl:null, heading:null, headingRef:null, ts:null };
+
+  let lat = dms(g[2]), lon = dms(g[4]);
+  if(lat!=null && ref(g[1]).startsWith("S")) lat = -lat;
+  if(lon!=null && ref(g[3]).startsWith("W")) lon = -lon;
+  if(lat!=null && lon!=null && Math.abs(lat)<=90 && Math.abs(lon)<=180 && (lat!==0 || lon!==0)){
+    out.lat = lat; out.lon = lon;
+  }
+  if(g[6] && g[6].length){
+    let a = g[6][0];
+    if(g[5] && g[5][0] === 1) a = -a;
+    if(a > -500 && a < 9000) out.altMsl = a;
+  }
+  if(g[17] && g[17].length){
+    const h = ((g[17][0] % 360) + 360) % 360;
+    out.heading = h; out.headingRef = ref(g[16]) || "T";
+  }
+  const parse = s => {
+    const m = /^(\d{4})[:-](\d{2})[:-](\d{2})[ T](\d{2}):(\d{2}):(\d{2})/.exec(String(s||""));
+    return m ? new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5], +m[6]).getTime() : null;
+  };
+  out.ts = parse(e[0x9003]) || parse(e[0x9004]) || parse(z[0x0132]);
+  if(out.ts == null && typeof g[29] === "string" && g[7] && g[7].length>=3){
+    const d = /^(\d{4}):(\d{2}):(\d{2})/.exec(g[29]);
+    if(d) out.ts = Date.UTC(+d[1], +d[2]-1, +d[3],
+      Math.round(g[7][0]), Math.round(g[7][1]), Math.round(g[7][2]));
+  }
+  return out;
+}
+
+async function importFiles(files){
+  files = Array.from(files||[]).filter(f=>/^image\//.test(f.type||""));
+  if(!files.length){ toast(T("libNone")); return; }
+  toast(T("libBusy"));
+  let ok=0, ohne=0, letzte=null;
+  for(const f of files){
+    try{
+      const head = await f.slice(0, 512*1024).arrayBuffer();
+      const meta = exifToRec(findExif(new DataView(head))) || {};
+      let hdg = meta.heading;
+      if(hdg!=null && meta.headingRef==="M") hdg = ((hdg + SET.decl)%360+360)%360;
+      const rec = { id:uid(), ts:meta.ts || f.lastModified || Date.now(),
+        lat:meta.lat!=null?meta.lat:null, lon:meta.lon!=null?meta.lon:null, acc:null,
+        altEll:null, altMsl:meta.altMsl!=null?meta.altMsl:null, altAcc:null, geoid:0,
+        heading:hdg!=null?hdg:null, tilt:null,
+        kategorie:"other", notiz:"", autor:autorNow(), geheim:uid(),
+        sync:(SET.share && cloudReady() && meta.lat!=null) ? 1 : 0, quelle:"lib" };
+      rec.blob = f;                       // Original bleibt unangetastet, EXIF erhalten
+      rec.thumb = await shrink(f,240,.72);
+      await DB.put("shots",rec);
+      letzte = rec.thumb; ok++; if(rec.lat==null) ohne++;
+    }catch(e){ console.warn("import",e); }
+  }
+  if(letzte) $("#lastthumb").src = URL.createObjectURL(letzte);
+  refreshList(); renderMap();
+  toast(ok ? T("libDone", ok, ohne) : T("libNone"));
+  pushPending();
 }
 
 /* =========================================================
-   EXIF: GPS-Block in die JPEG-Datei schreiben
+   EXIF
    ========================================================= */
-async function withExif(blob, rec){
+async function withExif(blob,rec){
   try{
     if(rec.lat==null) return blob;
-    const app1 = buildExif(rec);
-    const buf = new Uint8Array(await blob.arrayBuffer());
-    if(!(buf[0]===0xFF && buf[1]===0xD8)) return blob;
-    const out = new Uint8Array(2 + app1.length + (buf.length-2));
-    out.set(buf.subarray(0,2),0); out.set(app1,2); out.set(buf.subarray(2), 2+app1.length);
+    const app1=buildExif(rec), buf=new Uint8Array(await blob.arrayBuffer());
+    if(!(buf[0]===0xFF&&buf[1]===0xD8)) return blob;
+    const out=new Uint8Array(2+app1.length+(buf.length-2));
+    out.set(buf.subarray(0,2),0); out.set(app1,2); out.set(buf.subarray(2),2+app1.length);
     return new Blob([out],{type:"image/jpeg"});
   }catch(e){ return blob; }
 }
 function buildExif(rec){
-  const dms = v => { v=Math.abs(v); const d=Math.floor(v), m=Math.floor((v-d)*60), s=(v-d-m/60)*3600;
-    return [[d,1],[m,1],[Math.round(s*10000),10000]]; };
-  const dt = new Date(rec.ts);
-  const desc = (rec.note||"Feldblick") + "\0";
-
-  const gps = [];
-  gps.push([0x0000,1,4,[2,3,0,0]]);                                    // Version
+  const dms=v=>{v=Math.abs(v);const d=Math.floor(v),m=Math.floor((v-d)*60),s=(v-d-m/60)*3600;
+    return [[d,1],[m,1],[Math.round(s*10000),10000]];};
+  const dt=new Date(rec.ts), desc=((rec.notiz||"Aspect Conditions")+"\0");
+  const gps=[];
+  gps.push([0x0000,1,4,[2,3,0,0]]);
   gps.push([0x0001,2,2,(rec.lat>=0?"N":"S")+"\0"]);
   gps.push([0x0002,5,3,dms(rec.lat)]);
   gps.push([0x0003,2,2,(rec.lon>=0?"E":"W")+"\0"]);
   gps.push([0x0004,5,3,dms(rec.lon)]);
-  if(rec.altMsl!=null){
-    gps.push([0x0005,1,1,[rec.altMsl<0?1:0]]);
-    gps.push([0x0006,5,1,[[Math.round(Math.abs(rec.altMsl)*100),100]]]);
-  }
+  if(rec.altMsl!=null){ gps.push([0x0005,1,1,[rec.altMsl<0?1:0]]);
+    gps.push([0x0006,5,1,[[Math.round(Math.abs(rec.altMsl)*100),100]]]); }
   gps.push([0x0007,5,3,[[dt.getUTCHours(),1],[dt.getUTCMinutes(),1],[dt.getUTCSeconds(),1]]]);
-  if(rec.heading!=null){
-    gps.push([0x0010,2,2,"T\0"]);
-    gps.push([0x0011,5,1,[[Math.round(rec.heading*100),100]]]);
-  }
-  gps.push([0x001D,2,11, dt.getUTCFullYear()+":"+pad(dt.getUTCMonth()+1)+":"+pad(dt.getUTCDate())+"\0"]);
+  if(rec.heading!=null){ gps.push([0x0010,2,2,"T\0"]);
+    gps.push([0x0011,5,1,[[Math.round(rec.heading*100),100]]]); }
+  gps.push([0x001D,2,11,dt.getUTCFullYear()+":"+pad(dt.getUTCMonth()+1)+":"+pad(dt.getUTCDate())+"\0"]);
   gps.sort((a,b)=>a[0]-b[0]);
-
-  const ifd0 = [[0x010E,2,desc.length,desc],[0x8825,4,1,null]];        // Beschreibung + GPS-Zeiger
-
-  const size = (t,c) => ({1:1,2:1,3:2,4:4,5:8,7:1}[t]||1)*c;
-  const ifdBytes = n => 2 + n*12 + 4;
-  const ifd0At = 8, gpsAt = ifd0At + ifdBytes(ifd0.length);
-  let dataAt = gpsAt + ifdBytes(gps.length);
-  // Datenbereich für IFD0-Werte > 4 Byte
-  const plan = [];
-  let cursor = dataAt;
-  for(const e of ifd0){ if(e[3]!==null && size(e[1],e[2])>4){ plan.push([e,cursor]); cursor += size(e[1],e[2]); } }
-  for(const e of gps){ if(size(e[1],e[2])>4){ plan.push([e,cursor]); cursor += size(e[1],e[2]); } }
-  const tiffLen = cursor;
-
-  const tiff = new DataView(new ArrayBuffer(tiffLen));
-  const u8 = new Uint8Array(tiff.buffer);
-  const LE = true;
-  u8[0]=0x49; u8[1]=0x49; tiff.setUint16(2,42,LE); tiff.setUint32(4,ifd0At,LE);
-
-  const offOf = e => { const p = plan.find(p=>p[0]===e); return p?p[1]:null; };
-  function writeValue(e, at){
-    const [tag,type,count,val] = e;
-    const target = offOf(e); const base = target!=null ? target : at;
-    if(type===2){ for(let i=0;i<count;i++) u8[base+i] = val.charCodeAt(i)&0xFF; }
-    else if(type===1){ for(let i=0;i<count;i++) u8[base+i] = val[i]; }
-    else if(type===5){ for(let i=0;i<count;i++){ tiff.setUint32(base+i*8, val[i][0],LE); tiff.setUint32(base+i*8+4, val[i][1],LE); } }
-    else if(type===4){ tiff.setUint32(base, val[0],LE); }
-    if(target!=null) tiff.setUint32(at, target, LE);
+  const ifd0=[[0x010E,2,desc.length,desc],[0x8825,4,1,null]];
+  const size=(t,c)=>({1:1,2:1,3:2,4:4,5:8,7:1}[t]||1)*c, ifdBytes=n=>2+n*12+4;
+  const ifd0At=8, gpsAt=ifd0At+ifdBytes(ifd0.length);
+  let cursor=gpsAt+ifdBytes(gps.length); const plan=[];
+  for(const e of ifd0) if(e[3]!==null&&size(e[1],e[2])>4){ plan.push([e,cursor]); cursor+=size(e[1],e[2]); }
+  for(const e of gps)  if(size(e[1],e[2])>4){ plan.push([e,cursor]); cursor+=size(e[1],e[2]); }
+  const tiff=new DataView(new ArrayBuffer(cursor)), u8=new Uint8Array(tiff.buffer), LE=true;
+  u8[0]=0x49;u8[1]=0x49; tiff.setUint16(2,42,LE); tiff.setUint32(4,ifd0At,LE);
+  const offOf=e=>{const p=plan.find(p=>p[0]===e);return p?p[1]:null;};
+  function writeValue(e,at){
+    const [tag,type,count,val]=e, target=offOf(e), base=target!=null?target:at;
+    if(type===2){ for(let i=0;i<count;i++) u8[base+i]=val.charCodeAt(i)&0xFF; }
+    else if(type===1){ for(let i=0;i<count;i++) u8[base+i]=val[i]; }
+    else if(type===5){ for(let i=0;i<count;i++){ tiff.setUint32(base+i*8,val[i][0],LE); tiff.setUint32(base+i*8+4,val[i][1],LE);} }
+    else if(type===4){ tiff.setUint32(base,val[0],LE); }
+    if(target!=null) tiff.setUint32(at,target,LE);
   }
-  function writeIfd(at, entries, nextOff){
-    tiff.setUint16(at, entries.length, LE);
-    entries.forEach((e,i)=>{
-      const p = at+2+i*12;
-      tiff.setUint16(p, e[0], LE); tiff.setUint16(p+2, e[1], LE); tiff.setUint32(p+4, e[2], LE);
-      if(e[0]===0x8825){ tiff.setUint32(p+8, gpsAt, LE); return; }
-      writeValue(e, p+8);
-    });
-    tiff.setUint32(at+2+entries.length*12, nextOff, LE);
+  function writeIfd(at,entries,next){
+    tiff.setUint16(at,entries.length,LE);
+    entries.forEach((e,i)=>{ const p=at+2+i*12;
+      tiff.setUint16(p,e[0],LE); tiff.setUint16(p+2,e[1],LE); tiff.setUint32(p+4,e[2],LE);
+      if(e[0]===0x8825){ tiff.setUint32(p+8,gpsAt,LE); return; }
+      writeValue(e,p+8); });
+    tiff.setUint32(at+2+entries.length*12,next,LE);
   }
-  writeIfd(ifd0At, ifd0, 0);
-  writeIfd(gpsAt, gps, 0);
-
-  const app1 = new Uint8Array(4 + 6 + tiffLen);
-  app1[0]=0xFF; app1[1]=0xE1;
-  app1[2]=((6+tiffLen+2)>>8)&0xFF; app1[3]=(6+tiffLen+2)&0xFF;
-  app1.set([0x45,0x78,0x69,0x66,0,0],4);
-  app1.set(u8,10);
+  writeIfd(ifd0At,ifd0,0); writeIfd(gpsAt,gps,0);
+  const app1=new Uint8Array(4+6+cursor);
+  app1[0]=0xFF;app1[1]=0xE1; app1[2]=((6+cursor+2)>>8)&0xFF; app1[3]=(6+cursor+2)&0xFF;
+  app1.set([0x45,0x78,0x69,0x66,0,0],4); app1.set(u8,10);
   return app1;
 }
 
 /* =========================================================
+   Gemeinsame Datenbank
+   ========================================================= */
+const cloudReady = () => !!(SET.cloudUrl && SET.cloudKey);
+const Cloud = {
+  h(extra){ return Object.assign({apikey:SET.cloudKey,Authorization:"Bearer "+SET.cloudKey}, extra||{}); },
+  async put(path,blob){
+    const r=await fetch(SET.cloudUrl+"/storage/v1/object/fotos/"+path,
+      {method:"POST",headers:this.h({"Content-Type":"image/jpeg"}),body:blob});
+    if(!r.ok && r.status!==409) throw new Error("Upload "+r.status);
+  },
+  async insert(row){
+    const r=await fetch(SET.cloudUrl+"/rest/v1/sichtungen",
+      {method:"POST",headers:this.h({"Content-Type":"application/json",Prefer:"return=minimal"}),
+       body:JSON.stringify(row)});
+    if(!r.ok && r.status!==409) throw new Error("Insert "+r.status);
+  },
+  async list(sinceIso){
+    const q="/rest/v1/sichtungen?select=id,ts,lat,lon,alt_msl,heading,kategorie,notiz,autor,foto"
+      +(sinceIso?"&ts=gte."+sinceIso:"")+"&order=ts.desc&limit=1000";
+    const r=await fetch(SET.cloudUrl+q,{headers:this.h()});
+    if(!r.ok) throw new Error("List "+r.status);
+    return r.json();
+  },
+  async update(id,geheim,kategorie,notiz){
+    const r=await fetch(SET.cloudUrl+"/rest/v1/rpc/sichtung_aendern",
+      {method:"POST",headers:this.h({"Content-Type":"application/json"}),
+       body:JSON.stringify({p_id:id,p_geheim:geheim,p_kategorie:kategorie,p_notiz:notiz})});
+    return r.ok;
+  },
+  async remove(id,geheim){
+    const r=await fetch(SET.cloudUrl+"/rest/v1/rpc/sichtung_loeschen",
+      {method:"POST",headers:this.h({"Content-Type":"application/json"}),
+       body:JSON.stringify({p_id:id,p_geheim:geheim})});
+    return r.ok;
+  },
+  url(path){ return SET.cloudUrl+"/storage/v1/object/public/fotos/"+path; }
+};
+let pushing=false;
+async function pushPending(){
+  if(pushing||!cloudReady()||!navigator.onLine) return;
+  pushing=true;
+  try{
+    const todo=(await DB.all("shots")).filter(r=>r.sync===1);
+    for(const rec of todo){
+      try{
+        const name=rec.id+".jpg";
+        await Cloud.put("voll/"+name, await shrink(rec.blob,1600,.8));
+        await Cloud.put("mini/"+name, rec.thumb);
+        await Cloud.insert({ id:rec.id, ts:new Date(rec.ts).toISOString(),
+          lat:rec.lat, lon:rec.lon, acc:rec.acc, alt_msl:rec.altMsl, alt_ell:rec.altEll,
+          heading:rec.heading, tilt:rec.tilt, kategorie:rec.kategorie, notiz:rec.notiz,
+          autor:rec.autor||null, geheim:rec.geheim, foto:name });
+        rec.sync=2; await DB.put("shots",rec);
+      }catch(e){ console.warn("push",e); break; }
+    }
+  } finally { pushing=false; paintSyncState(); refreshList(); }
+}
+async function pullRemote(){
+  if(!cloudReady()){ toast(T("noServer")); return; }
+  if(!navigator.onLine){ toast(T("offlineShow")); return; }
+  const h=TSTEPS[SET.tIdx];
+  const since = h==null ? null : new Date(Date.now()-h*3600e3).toISOString();
+  try{
+    const rows=await Cloud.list(since);
+    for(const r of rows) await DB.put("fremde",{
+      id:r.id, ts:Date.parse(r.ts), lat:r.lat, lon:r.lon, altMsl:r.alt_msl, heading:r.heading,
+      kategorie:r.kategorie||"other", notiz:r.notiz||"", autor:r.autor||"", foto:r.foto, holTs:Date.now() });
+    toast(T("loadedN",rows.length)); renderMap();
+  }catch(e){ toast(T("serverFail")); }
+  paintSyncState();
+}
+async function paintSyncState(){
+  const all=await DB.all("shots");
+  const fremd=(await DB.all("fremde")).length;
+  $("#syncState").textContent = !cloudReady() ? T("noServer")
+    : T("syncLine", all.filter(r=>r.sync===2).length, all.filter(r=>r.sync===1).length, fremd);
+}
+window.addEventListener("online", pushPending);
+
+/* =========================================================
    Karte
    ========================================================= */
-let map, layerShots, meMarker;
+let map,layerShots;
 function initMap(){
-  map = L.map("map",{zoomControl:true, attributionControl:true}).setView([51.16,10.45],6);
-  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-    {maxZoom:19, attribution:"© OpenStreetMap"}).addTo(map);
-  layerShots = L.layerGroup().addTo(map);
+  map=L.map("map",{zoomControl:true}).setView([46.6,10.9],8);
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"}).addTo(map);
+  layerShots=L.layerGroup().addTo(map);
 }
-function conePoly(rec){
-  const half = SET.fov/2, pts=[[rec.lat,rec.lon]];
-  for(let a=-half; a<=half; a+=Math.max(2,SET.fov/24)) pts.push(destPoint(rec.lat,rec.lon,rec.heading+a,SET.range));
-  pts.push(destPoint(rec.lat,rec.lon,rec.heading+half,SET.range));
+const cutoff=()=>{ const h=TSTEPS[SET.tIdx]; return h==null?null:Date.now()-h*3600e3; };
+function conePoly(lat,lon,heading){
+  const half=SET.fov/2, pts=[[lat,lon]];
+  for(let a=-half;a<=half;a+=Math.max(2,SET.fov/24)) pts.push(destPoint(lat,lon,heading+a,SET.range));
+  pts.push(destPoint(lat,lon,heading+half,SET.range));
   return pts;
 }
-function addToMap(rec){
-  if(rec.lat==null || !map) return;
-  if(rec.heading!=null){
-    L.polygon(conePoly(rec),{color:"#FF6A2B",weight:1,opacity:.9,fillColor:"#FF6A2B",fillOpacity:.22})
-      .addTo(layerShots).on("click",()=>openShot(rec));
-  }
-  const m = L.marker([rec.lat,rec.lon],{icon:L.divIcon({className:"",html:'<div class="pin"></div>',iconSize:[14,14],iconAnchor:[7,7]})})
-    .addTo(layerShots);
-  m.bindPopup(popupHtml(rec),{maxWidth:230});
-  m.on("popupopen", e => {
-    const img = e.popup.getElement().querySelector("img");
-    if(img && rec.thumb) img.src = URL.createObjectURL(rec.thumb);
+function freshness(ts){
+  const h=TSTEPS[SET.tIdx], span=(h==null?24*365:h)*3600e3;
+  return Math.max(0,Math.min(1,1-(Date.now()-ts)/span));
+}
+function drawOne(r,own){
+  const col=own?"#FF6A2B":"#57C2A4", f=freshness(r.ts);
+  if(r.heading!=null)
+    L.polygon(conePoly(r.lat,r.lon,r.heading),
+      {color:col,weight:1,opacity:.35+.6*f,fillColor:col,fillOpacity:.07+.23*f})
+      .addTo(layerShots).on("click",()=>own?openShot(r):openRemote(r));
+  const m=L.marker([r.lat,r.lon],{icon:L.divIcon({className:"",
+    html:'<div class="pin'+(own?"":" other")+'" style="opacity:'+(.45+.55*f)+'"></div>',
+    iconSize:[14,14],iconAnchor:[7,7]})}).addTo(layerShots);
+  m.bindPopup(popupHtml(r,own),{maxWidth:240});
+  m.on("popupopen",e=>{
+    const img=e.popup.getElement().querySelector("img");
+    if(img){ if(own && r.thumb) img.src=URL.createObjectURL(r.thumb);
+             else if(!own && r.foto) img.src=Cloud.url("mini/"+r.foto); }
+    const b=e.popup.getElement().querySelector("[data-open]");
+    if(b) b.onclick=()=>own?openShot(r):openRemote(r);
   });
 }
-function popupHtml(rec){
+function popupHtml(r,own){
   const row=(k,v)=>'<div class="row"><span>'+k+'</span><b>'+v+'</b></div>';
-  return '<div class="pop"><img alt="Aufnahme">'
-    + row("Zeit", stamp(rec.ts))
-    + row("Position", rec.lat.toFixed(5)+", "+rec.lon.toFixed(5))
-    + row("Höhe ü. NN", rec.altMsl!=null?rec.altMsl.toFixed(1)+" m":"–")
-    + row("Richtung", rec.heading!=null?Math.round(rec.heading)+"° "+cardinal(rec.heading):"–")
-    + row("Genauigkeit", rec.acc!=null?"± "+Math.round(rec.acc)+" m":"–")
-    + "</div>";
+  return '<div class="pop"><img alt="">'
+    +'<span class="kat">'+KATL(r.kategorie)+'</span>'
+    +(r.notiz?'<div class="note">'+esc(r.notiz)+'</div>':'')
+    +row(T("dTaken"), ago(r.ts))
+    +row(T("dAlt"), r.altMsl!=null?Math.round(r.altMsl)+" m":"–")
+    +row(T("dDir"), r.heading!=null?Math.round(r.heading)+"° "+cardinal(r.heading):"–")
+    +row(T("dBy"), own?T("dMe"):(r.autor?esc(r.autor):T("dAnon")))
+    +'<button class="btn" data-open style="margin-top:8px;width:100%;background:#0B1E26;color:#E9DFC9;border:0">'
+    +T("dView")+'</button></div>';
 }
-async function redrawMap(){
+async function renderMap(){
   if(!map) return;
   layerShots.clearLayers();
-  const all = await DB.all(); all.forEach(addToMap);
+  const cut=cutoff();
+  const own=(await DB.all("shots")).filter(r=>r.lat!=null&&(cut===null||r.ts>=cut));
+  const ownIds=new Set(own.map(r=>r.id));
+  let fremd=[];
+  if(!SET.onlyMine) fremd=(await DB.all("fremde"))
+    .filter(r=>r.lat!=null&&!ownIds.has(r.id)&&(cut===null||r.ts>=cut));
+  fremd.forEach(r=>drawOne(r,false));
+  own.forEach(r=>drawOne(r,true));
+  $("#tCount").textContent = SET.onlyMine ? T("cnt",own.length) : T("cntBoth",own.length,fremd.length);
 }
 async function fitAll(){
-  const all = (await DB.all()).filter(r=>r.lat!=null);
-  if(!all.length){ toast("Noch keine verorteten Fotos"); return; }
-  map.fitBounds(L.latLngBounds(all.map(r=>[r.lat,r.lon])).pad(.35));
+  const cut=cutoff();
+  const a=(await DB.all("shots")).filter(r=>r.lat!=null&&(cut===null||r.ts>=cut));
+  const b=SET.onlyMine?[]:(await DB.all("fremde")).filter(r=>r.lat!=null&&(cut===null||r.ts>=cut));
+  const pts=a.concat(b).map(r=>[r.lat,r.lon]);
+  if(!pts.length){ toast(T("nothingRange")); return; }
+  map.fitBounds(L.latLngBounds(pts).pad(.3));
 }
-
-/* Kartenausschnitt für Offline-Nutzung laden */
 async function cacheTiles(){
-  const b=map.getBounds(), z0=Math.round(map.getZoom());
-  const cache = await caches.open("feldblick-tiles");
-  const urls=[];
-  for(let z=z0; z<=Math.min(17,z0+2); z++){
-    const f = (lat,lon)=>[Math.floor((lon+180)/360*2**z),
+  const b=map.getBounds(),z0=Math.round(map.getZoom());
+  const cache=await caches.open("aspect-tiles"), urls=[];
+  for(let z=z0;z<=Math.min(17,z0+2);z++){
+    const f=(lat,lon)=>[Math.floor((lon+180)/360*2**z),
       Math.floor((1-Math.log(Math.tan(lat*D2R)+1/Math.cos(lat*D2R))/Math.PI)/2*2**z)];
-    const [x1,y1]=f(b.getNorth(),b.getWest()), [x2,y2]=f(b.getSouth(),b.getEast());
+    const [x1,y1]=f(b.getNorth(),b.getWest()),[x2,y2]=f(b.getSouth(),b.getEast());
     for(let x=x1;x<=x2;x++) for(let y=y1;y<=y2;y++)
       urls.push("https://tile.openstreetmap.org/"+z+"/"+x+"/"+y+".png");
   }
-  if(urls.length>900){ toast("Ausschnitt zu groß – näher heranzoomen"); return; }
-  toast(urls.length+" Kacheln werden geladen");
-  let ok=0;
-  for(let i=0;i<urls.length;i+=6){
-    await Promise.all(urls.slice(i,i+6).map(u=>
-      fetch(u,{mode:"no-cors"}).then(r=>cache.put(u,r)).then(()=>ok++).catch(()=>{})));
-  }
-  toast(ok+" Kacheln offline verfügbar");
+  if(urls.length>900){ toast(T("tooBig")); return; }
+  toast(T("tilesLoading",urls.length)); let ok=0;
+  for(let i=0;i<urls.length;i+=6)
+    await Promise.all(urls.slice(i,i+6).map(u=>fetch(u,{mode:"no-cors"}).then(r=>cache.put(u,r)).then(()=>ok++).catch(()=>{})));
+  toast(T("tilesReady",ok));
 }
 
 /* =========================================================
-   Archiv
+   Archiv & Detail
    ========================================================= */
 async function refreshList(){
-  const all = (await DB.all()).sort((a,b)=>b.ts-a.ts);
-  $("#cnt").textContent = all.length ? "· "+all.length : "";
-  const body = $("#listBody");
+  const all=(await DB.all("shots")).sort((a,b)=>b.ts-a.ts);
+  $("#cnt").textContent = all.length?"· "+all.length:"";
+  const body=$("#listBody");
   if(!all.length){
-    body.innerHTML = '<div class="empty">'
-      + '<svg class="contour" viewBox="0 0 120 64" fill="none" stroke="#1D4650" stroke-width="1.5">'
-      + '<path d="M2 54c18-6 28-22 48-22s28 16 46 12"/><path d="M10 46c14-8 24-18 40-18s26 12 42 10"/>'
-      + '<path d="M22 38c10-6 18-12 28-12s20 8 32 8"/><path d="M36 31c6-4 10-7 15-7s12 5 19 5"/>'
-      + '<circle cx="56" cy="26" r="3" stroke="#FF6A2B"/></svg>'
-      + 'Noch keine Aufnahmen.<br>Wechsle zu <b>Aufnahme</b> und drücke den Auslöser.</div>';
+    body.innerHTML='<div class="empty"><svg style="width:120px;height:64px;margin-bottom:16px;opacity:.6" viewBox="0 0 120 64" fill="none" stroke="#1D4650" stroke-width="1.6">'
+      +'<path d="M4 56L38 16l14 17 10-11 30 34z"/><path d="M38 16l8 10-9 4-6-6z" stroke="#E9DFC9"/>'
+      +'<circle cx="22" cy="52" r="3" stroke="#FF6A2B"/></svg>'
+      +T("emptyTitle")+'<br>'+T("emptyHint")+'</div>';
     return;
   }
   body.innerHTML="";
   for(const r of all){
+    const st = r.sync===2?["up",T("stShared")] : r.sync===1?["wait",T("stWaiting")] : ["off",T("stLocal")];
     const el=document.createElement("div"); el.className="item";
-    el.innerHTML = '<img alt="">'
-      + '<div class="meta"><div class="t">'+stamp(r.ts)+'</div><div class="d">'
-      + (r.lat!=null ? fmtCoord(r.lat,r.lon) : "ohne Position")
-      + '<br><i>'+(r.altMsl!=null?r.altMsl.toFixed(1)+" m ü. NN":"– m")+'</i>'
-      + ' · <u>'+(r.heading!=null?Math.round(r.heading)+"° "+cardinal(r.heading):"– °")+'</u></div></div>'
-      + '<button class="btn" data-del="'+r.id+'">Löschen</button>';
-    if(r.thumb) el.querySelector("img").src = URL.createObjectURL(r.thumb);
-    el.querySelector("img").onclick = ()=>openShot(r);
-    el.querySelector("[data-del]").onclick = async ()=>{
-      await DB.del(r.id); refreshList(); redrawMap(); toast("Gelöscht"); };
+    el.innerHTML='<img alt="">'
+      +'<div class="meta"><div class="t">'+stamp(r.ts)+' <span class="sync '+st[0]+'">· '+st[1]+'</span></div>'
+      +'<div class="d">'+KATL(r.kategorie)+(r.quelle==="lib"?" · "+T("srcLib"):"")
+      +(r.notiz?" – "+esc(r.notiz.slice(0,42)):"")
+      +'<br><i>'+(r.altMsl!=null?Math.round(r.altMsl)+" m":"– m")+'</i> · <u>'
+      +(r.heading!=null?Math.round(r.heading)+"° "+cardinal(r.heading):"–")+'</u></div></div>'
+      +'<button class="btn" data-del>'+T("del")+'</button>';
+    if(r.thumb) el.querySelector("img").src=URL.createObjectURL(r.thumb);
+    el.querySelector("img").onclick=()=>openShot(r);
+    el.querySelector("[data-del]").onclick=async()=>{
+      if(r.sync===2&&cloudReady()&&navigator.onLine) await Cloud.remove(r.id,r.geheim);
+      await DB.del("shots",r.id); await DB.del("fremde",r.id);
+      refreshList(); renderMap(); toast(T("deleted")); };
     body.appendChild(el);
   }
+  paintSyncState();
+}
+const kv=(k,v)=>'<div style="display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid var(--ink-2)">'
+  +'<span class="eyebrow">'+k+'</span><span class="num" style="font-size:13px">'+v+'</span></div>';
+function detailBody(r,extra){
+  return kv(T("dTime"),stamp(r.ts)+" · "+ago(r.ts))
+    +kv(T("dCond"),KATL(r.kategorie))
+    +(r.notiz?kv(T("dNote"),esc(r.notiz)):"")
+    +kv(T("dPos"),r.lat!=null?fmtCoord(r.lat,r.lon):"–")
+    +kv(T("dAlt"),r.altMsl!=null?r.altMsl.toFixed(0)+" m":"–")
+    +kv(T("dDir"),r.heading!=null?r.heading.toFixed(0)+"° "+cardinal(r.heading):"–")
+    +(extra||"");
 }
 function openShot(rec){
   const sh=$("#sheet");
-  sh.innerHTML = '<div class="head"><h2>Aufnahme</h2><button class="btn" id="shClose">Schließen</button></div>'
-    + '<div class="scroll"><img style="width:100%;display:block" alt="">'
-    + '<div style="padding:14px">'
-    + kv("Zeit", stamp(rec.ts))
-    + kv("Position", rec.lat!=null?fmtCoord(rec.lat,rec.lon):"–")
-    + kv("Lagegenauigkeit", rec.acc!=null?"± "+Math.round(rec.acc)+" m":"–")
-    + kv("Höhe ü. NN", rec.altMsl!=null?rec.altMsl.toFixed(1)+" m":"–")
-    + kv("GPS-Höhe (Ellipsoid)", rec.altEll!=null?rec.altEll.toFixed(1)+" m · N "+rec.geoid:"–")
-    + kv("Richtung", rec.heading!=null?rec.heading.toFixed(1)+"° "+cardinal(rec.heading):"–")
-    + kv("Neigung", rec.tilt!=null?rec.tilt.toFixed(0)+"°":"–")
-    + '<div style="display:flex;gap:8px;margin-top:16px">'
-    + '<button class="btn go" id="shSave">Foto sichern</button>'
-    + '<button class="btn" id="shMap">Auf Karte</button></div></div></div>';
+  sh.innerHTML='<div class="head"><h2>'+T("dMine")+'</h2><button class="btn" id="shClose">'+T("dClose")+'</button></div>'
+    +'<div class="scroll"><img style="width:100%;display:block" alt=""><div style="padding:14px">'
+    +detailBody(rec, kv(T("dGpsAlt"),(rec.altEll!=null?rec.altEll.toFixed(0)+" m":"–")+" · N "+rec.geoid)
+      +kv(T("dAcc"),rec.acc!=null?"± "+Math.round(rec.acc)+" m":"–")
+      +kv(T("dStatus"),rec.sync===2?T("stShared"):rec.sync===1?T("stWaiting"):T("stLocal"))
+      +(rec.sync>0?kv(T("dBy"),rec.autor?esc(rec.autor):T("dAnon")):""))
+    +'<div style="display:flex;gap:8px;margin-top:16px">'
+    +'<button class="btn go" id="shSave">'+T("dSave")+'</button>'
+    +(rec.sync===0&&cloudReady()?'<button class="btn" id="shShare">'+T("dShare")+'</button>':'')
+    +'<button class="btn" id="shMap">'+T("dToMap")+'</button></div>'
+    +'<div style="margin-top:24px;border-top:1px solid var(--ink-3);padding-top:16px">'
+    +'<div class="eyebrow" style="margin-bottom:9px">'+T("dEdit")+'</div>'
+    +'<div class="chips" id="eKats">'
+    + KATS.map(k=>'<button class="chip" data-k="'+k[0]+'" aria-pressed="'
+        +(rec.kategorie===k[0])+'">'+T(k[1])+'</button>').join("")
+    +'</div>'
+    +'<label class="field" style="border:0;padding:14px 0 0">'
+    +'<textarea id="eNote" rows="3" placeholder="'+esc(T("shNotePh"))+'">'+esc(rec.notiz||"")+'</textarea></label>'
+    +'<button class="btn" id="eSave" style="margin-top:10px;width:100%">'+T("shSave")+'</button>'
+    +'</div></div></div>';
   sh.classList.add("on");
-  sh.querySelector("img").src = URL.createObjectURL(rec.blob);
-  $("#shClose").onclick = ()=>sh.classList.remove("on");
-  $("#shSave").onclick = ()=>download(rec.blob, shotName(rec));
-  $("#shMap").onclick = ()=>{ sh.classList.remove("on"); show("v-map");
-    if(rec.lat!=null) map.setView([rec.lat,rec.lon],17); };
+  sh.querySelector("img").src=URL.createObjectURL(rec.blob);
+  let kat=rec.kategorie;
+  $("#eKats").onclick=e=>{ const b=e.target.closest(".chip"); if(!b) return; kat=b.dataset.k;
+    $("#eKats").querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed",c===b)); };
+  $("#eSave").onclick=async()=>{
+    rec.kategorie=kat; rec.notiz=$("#eNote").value.trim().slice(0,400);
+    await DB.put("shots",rec);
+    let msg=T("editSaved");
+    if(rec.sync===2 && cloudReady() && navigator.onLine){
+      const ok=await Cloud.update(rec.id,rec.geheim,rec.kategorie,rec.notiz);
+      if(!ok) msg=T("editRemoteFail");
+    }
+    sh.classList.remove("on"); refreshList(); renderMap(); toast(msg); };
+  $("#shClose").onclick=()=>sh.classList.remove("on");
+  $("#shSave").onclick=()=>download(rec.blob,shotName(rec));
+  if($("#shShare")) $("#shShare").onclick=async()=>{ rec.sync=1; rec.autor=(SET.postAs==="name"&&SET.autor)?SET.autor:"";
+    await DB.put("shots",rec); sh.classList.remove("on"); refreshList(); toast(T("sending")); pushPending(); };
+  $("#shMap").onclick=()=>{ sh.classList.remove("on"); show("v-map");
+    if(rec.lat!=null) map.setView([rec.lat,rec.lon],15); };
 }
-const kv=(k,v)=>'<div class="row" style="display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid var(--ink-2)">'
-  +'<span class="eyebrow">'+k+'</span><span class="num" style="font-size:13px">'+v+'</span></div>';
-const shotName = r => "feldblick_"+fileStamp(r.ts)
-  + (r.lat!=null ? "_"+r.lat.toFixed(5)+"_"+r.lon.toFixed(5) : "")
-  + (r.heading!=null ? "_"+Math.round(r.heading)+"deg" : "") + ".jpg";
-
+function openRemote(r){
+  const sh=$("#sheet");
+  sh.innerHTML='<div class="head"><h2>'+T("dPostBy", r.autor?esc(r.autor):T("dAnon"))+'</h2>'
+    +'<button class="btn" id="shClose">'+T("dClose")+'</button></div>'
+    +'<div class="scroll"><img style="width:100%;display:block;background:var(--ink-2);min-height:120px" alt="">'
+    +'<div style="padding:14px">'+detailBody(r)+'</div></div>';
+  sh.classList.add("on");
+  if(r.foto) sh.querySelector("img").src=Cloud.url("voll/"+r.foto);
+  $("#shClose").onclick=()=>sh.classList.remove("on");
+}
+const shotName=r=>"aspect_"+fileStamp(r.ts)
+  +(r.lat!=null?"_"+r.lat.toFixed(5)+"_"+r.lon.toFixed(5):"")
+  +(r.heading!=null?"_"+Math.round(r.heading)+"deg":"")+".jpg";
 function download(blob,name){
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name;
   document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),8000);
 }
 
 /* =========================================================
-   Export: GeoJSON, CSV, ZIP
+   Export
    ========================================================= */
 async function buildGeoJSON(){
-  const all = (await DB.all()).filter(r=>r.lat!=null);
-  return { type:"FeatureCollection", features: all.flatMap(r=>{
-    const props = { datei:shotName(r), zeit:new Date(r.ts).toISOString(),
-      hoehe_ueber_nn_m:r.altMsl, gps_hoehe_ellipsoid_m:r.altEll, geoid_n_m:r.geoid,
-      lagegenauigkeit_m:r.acc, richtung_grad:r.heading, neigung_grad:r.tilt };
-    const f = [{ type:"Feature", geometry:{type:"Point",coordinates:[r.lon,r.lat, r.altMsl??0]},
-      properties:Object.assign({typ:"standpunkt"},props) }];
-    if(r.heading!=null) f.push({ type:"Feature",
-      geometry:{type:"Polygon",coordinates:[conePoly(r).map(p=>[p[1],p[0]]).concat([[r.lon,r.lat]])]},
-      properties:Object.assign({typ:"blickfeld",reichweite_m:SET.range,oeffnung_grad:SET.fov},props) });
-    return f;
-  })};
+  const all=(await DB.all("shots")).filter(r=>r.lat!=null);
+  return {type:"FeatureCollection",features:all.flatMap(r=>{
+    const props={file:shotName(r),time:new Date(r.ts).toISOString(),conditions:KATL(r.kategorie),
+      note:r.notiz||"",elevation_m:r.altMsl,gps_ellipsoid_m:r.altEll,geoid_n_m:r.geoid,
+      accuracy_m:r.acc,bearing_deg:r.heading,tilt_deg:r.tilt};
+    const f=[{type:"Feature",geometry:{type:"Point",coordinates:[r.lon,r.lat,r.altMsl??0]},
+      properties:Object.assign({type:"viewpoint"},props)}];
+    if(r.heading!=null) f.push({type:"Feature",
+      geometry:{type:"Polygon",coordinates:[conePoly(r.lat,r.lon,r.heading).map(p=>[p[1],p[0]]).concat([[r.lon,r.lat]])]},
+      properties:Object.assign({type:"field_of_view",range_m:SET.range,fov_deg:SET.fov},props)});
+    return f;})};
 }
 async function buildCSV(){
-  const all = (await DB.all());
-  const head = "datei;zeit;breite;laenge;hoehe_ueber_nn_m;gps_hoehe_ellipsoid_m;geoid_n_m;lagegenauigkeit_m;richtung_grad;neigung_grad";
-  const rows = all.map(r=>[shotName(r), new Date(r.ts).toISOString(), r.lat??"", r.lon??"",
-    r.altMsl?.toFixed(2)??"", r.altEll?.toFixed(2)??"", r.geoid, r.acc?.toFixed(1)??"",
-    r.heading?.toFixed(1)??"", r.tilt?.toFixed(1)??""].join(";"));
-  return "\ufeff"+[head,...rows].join("\r\n");
+  const all=await DB.all("shots");
+  const head="file;time;conditions;note;lat;lon;elevation_m;gps_ellipsoid_m;accuracy_m;bearing_deg;tilt_deg";
+  return "\ufeff"+[head,...all.map(r=>[shotName(r),new Date(r.ts).toISOString(),
+    KATL(r.kategorie),(r.notiz||"").replace(/;/g,","),r.lat??"",r.lon??"",
+    r.altMsl?.toFixed(1)??"",r.altEll?.toFixed(1)??"",r.acc?.toFixed(1)??"",
+    r.heading?.toFixed(1)??"",r.tilt?.toFixed(1)??""].join(";"))].join("\r\n");
 }
-/* Minimaler ZIP-Schreiber, Methode "gespeichert" (JPEG ist bereits komprimiert) */
 const CRCT=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;
   for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0;}return t;})();
 function crc32(u8){let c=0xFFFFFFFF;for(let i=0;i<u8.length;i++)c=CRCT[(c^u8[i])&0xFF]^(c>>>8);return (c^0xFFFFFFFF)>>>0;}
-function dosTime(d){return ((d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()/2))&0xFFFF;}
-function dosDate(d){return (((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate())&0xFFFF;}
+const dosTime=d=>((d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()/2))&0xFFFF;
+const dosDate=d=>(((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate())&0xFFFF;
 async function makeZip(files){
-  const parts=[], central=[]; let offset=0;
+  const parts=[],central=[]; let offset=0;
   for(const f of files){
-    const name=new TextEncoder().encode(f.name);
-    const data=new Uint8Array(await f.blob.arrayBuffer());
+    const name=new TextEncoder().encode(f.name), data=new Uint8Array(await f.blob.arrayBuffer());
     const crc=crc32(data), d=f.date||new Date();
-    const lh=new DataView(new ArrayBuffer(30)); const lu=new Uint8Array(lh.buffer);
-    lh.setUint32(0,0x04034b50,true); lh.setUint16(4,20,true); lh.setUint16(6,0x0800,true);
-    lh.setUint16(8,0,true); lh.setUint16(10,dosTime(d),true); lh.setUint16(12,dosDate(d),true);
-    lh.setUint32(14,crc,true); lh.setUint32(18,data.length,true); lh.setUint32(22,data.length,true);
-    lh.setUint16(26,name.length,true); lh.setUint16(28,0,true);
+    const lh=new DataView(new ArrayBuffer(30)), lu=new Uint8Array(lh.buffer);
+    lh.setUint32(0,0x04034b50,true);lh.setUint16(4,20,true);lh.setUint16(6,0x0800,true);
+    lh.setUint16(10,dosTime(d),true);lh.setUint16(12,dosDate(d),true);lh.setUint32(14,crc,true);
+    lh.setUint32(18,data.length,true);lh.setUint32(22,data.length,true);lh.setUint16(26,name.length,true);
     parts.push(lu,name,data);
-    const ch=new DataView(new ArrayBuffer(46)); const cu=new Uint8Array(ch.buffer);
-    ch.setUint32(0,0x02014b50,true); ch.setUint16(4,20,true); ch.setUint16(6,20,true);
-    ch.setUint16(8,0x0800,true); ch.setUint16(10,0,true); ch.setUint16(12,dosTime(d),true);
-    ch.setUint16(14,dosDate(d),true); ch.setUint32(16,crc,true);
-    ch.setUint32(20,data.length,true); ch.setUint32(24,data.length,true);
-    ch.setUint16(28,name.length,true); ch.setUint32(42,offset,true);
-    central.push(cu,name);
-    offset += 30+name.length+data.length;
+    const ch=new DataView(new ArrayBuffer(46)), cu=new Uint8Array(ch.buffer);
+    ch.setUint32(0,0x02014b50,true);ch.setUint16(4,20,true);ch.setUint16(6,20,true);ch.setUint16(8,0x0800,true);
+    ch.setUint16(12,dosTime(d),true);ch.setUint16(14,dosDate(d),true);ch.setUint32(16,crc,true);
+    ch.setUint32(20,data.length,true);ch.setUint32(24,data.length,true);ch.setUint16(28,name.length,true);
+    ch.setUint32(42,offset,true);
+    central.push(cu,name); offset+=30+name.length+data.length;
   }
-  const cStart=offset; let cSize=0; central.forEach(p=>cSize+=p.length);
-  const end=new DataView(new ArrayBuffer(22)); 
-  end.setUint32(0,0x06054b50,true); end.setUint16(8,files.length,true); end.setUint16(10,files.length,true);
-  end.setUint32(12,cSize,true); end.setUint32(16,cStart,true);
+  let cSize=0; central.forEach(p=>cSize+=p.length);
+  const end=new DataView(new ArrayBuffer(22));
+  end.setUint32(0,0x06054b50,true);end.setUint16(8,files.length,true);end.setUint16(10,files.length,true);
+  end.setUint32(12,cSize,true);end.setUint32(16,offset,true);
   return new Blob([...parts,...central,new Uint8Array(end.buffer)],{type:"application/zip"});
 }
 async function exportZip(){
-  const all = await DB.all();
-  if(!all.length){ toast("Nichts zu exportieren"); return; }
-  toast("Export wird gepackt …");
-  const files = all.map(r=>({name:"fotos/"+shotName(r), blob:r.blob, date:new Date(r.ts)}));
-  files.push({name:"punkte.geojson", blob:new Blob([JSON.stringify(await buildGeoJSON(),null,1)])});
-  files.push({name:"punkte.csv", blob:new Blob([await buildCSV()])});
-  download(await makeZip(files), "feldblick_"+fileStamp(Date.now())+".zip");
+  const all=await DB.all("shots");
+  if(!all.length){ toast(T("nothingExp")); return; }
+  toast(T("packing"));
+  const files=all.map(r=>({name:"photos/"+shotName(r),blob:r.blob,date:new Date(r.ts)}));
+  files.push({name:"points.geojson",blob:new Blob([JSON.stringify(await buildGeoJSON(),null,1)])});
+  files.push({name:"points.csv",blob:new Blob([await buildCSV()])});
+  download(await makeZip(files),"aspect_"+fileStamp(Date.now())+".zip");
 }
 
 /* =========================================================
-   Höhenabgleich über ein Geländemodell (nur online)
+   Höhenabgleich
    ========================================================= */
+let calibrated=false;
 async function calibrate(){
-  if(S.lat==null || S.altEll==null){ toast("Warte auf GPS-Höhe"); return; }
-  $("#calState").textContent = "wird abgefragt …";
+  if(S.lat==null||S.altEll==null){ toast(T("calibWait")); return; }
+  $("#calState").textContent=T("sCalibAsk");
   try{
-    const r = await fetch("https://api.open-meteo.com/v1/elevation?latitude="+S.lat+"&longitude="+S.lon);
-    const j = await r.json();
-    const dem = j.elevation[0];                       // Geländehöhe über NN aus dem Höhenmodell
-    SET.geoid = +(S.altEll - dem - 1.5).toFixed(1);   // 1,5 m Handhöhe über Grund
-    saveSet(); $("#setGeoid").value = SET.geoid;
-    $("#calState").textContent = "Gelände "+dem.toFixed(0)+" m ü. NN · N = "+SET.geoid;
-    paintReadout(); toast("Höhe abgeglichen");
-  }catch(e){ $("#calState").textContent = "keine Verbindung zum Höhenmodell"; }
+    const j=await (await fetch("https://api.open-meteo.com/v1/elevation?latitude="+S.lat+"&longitude="+S.lon)).json();
+    const dem=j.elevation[0];
+    SET.geoid=+(S.altEll-dem-1.5).toFixed(1); saveSet(); $("#setGeoid").value=SET.geoid;
+    calibrated=true; SET.calibDem=dem; saveSet();
+    $("#calState").textContent=T("sCalibDone",dem.toFixed(0),SET.geoid);
+    paintReadout(); toast(T("calibOk"));
+  }catch(e){ $("#calState").textContent=T("sCalibFail"); }
 }
 
 /* =========================================================
    Bedienung
    ========================================================= */
 function show(id){
-  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("on", v.id===id));
-  document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected", b.dataset.v===id));
-  if(id==="v-map"){ if(!map){ initMap(); redrawMap(); } setTimeout(()=>map.invalidateSize(),60);
-    if(S.lat!=null && !meMarker){ meMarker=L.circleMarker([S.lat,S.lon],{radius:5,color:"#5FB2D6"}).addTo(map);} }
+  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("on",v.id===id));
+  document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===id));
+  if(id==="v-map"){
+    if(!map){ initMap(); renderMap(); if(cloudReady()) pullRemote(); }
+    setTimeout(()=>map.invalidateSize(),60);
+  }
   if(id==="v-list") refreshList();
-  if(id==="v-set") paintSensState();
+  if(id==="v-set"){ paintSensState(); paintSyncState(); }
 }
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>show(b.dataset.v));
-$("#shutter").onclick = capture;
-$("#startCam").onclick = ()=>{ startCamera(); askPermissions(); };
-$("#toGps").onclick = askPermissions;
-$("#askPerm").onclick = askPermissions;
-$("#fitAll").onclick = fitAll;
-$("#cacheTiles").onclick = cacheTiles;
-$("#calBtn").onclick = calibrate;
-$("#expZip").onclick = exportZip;
-$("#expGeo").onclick = async ()=>download(new Blob([JSON.stringify(await buildGeoJSON(),null,1)],
-  {type:"application/geo+json"}), "feldblick_"+fileStamp(Date.now())+".geojson");
-$("#wipe").onclick = async ()=>{ if(confirm("Wirklich alle Aufnahmen auf diesem Gerät löschen?")){
-  await DB.clear(); refreshList(); redrawMap(); toast("Archiv geleert"); } };
-$("#persist").onclick = async ()=>{
-  if(navigator.storage?.persist){ const ok = await navigator.storage.persist();
-    toast(ok?"Speicher ist geschützt":"Gerät hat abgelehnt"); paintQuota(); } };
+$("#shutter").onclick=capture;
+$("#startCam").onclick=()=>{startCamera();askPermissions();};
+$("#toGps").onclick=askPermissions;
+$("#askPerm").onclick=askPermissions;
+$("#fitAll").onclick=fitAll;
+$("#pullNow").onclick=pullRemote;
+$("#cacheTiles").onclick=cacheTiles;
+$("#calBtn").onclick=calibrate;
+$("#syncNow").onclick=()=>{pushPending();pullRemote();};
+$("#expZip").onclick=exportZip;
+$("#libBtn").onclick=()=>$("#libInput").click();
+$("#libInput").onchange=async e=>{ const f=e.target.files; e.target.value=""; await importFiles(f); };
+$("#wipe").onclick=async()=>{ if(confirm(T("sWipeAsk"))){
+  await DB.clear("shots"); await DB.clear("fremde"); refreshList(); renderMap(); toast(T("wiped")); }};
+$("#persist").onclick=async()=>{ if(navigator.storage?.persist){
+  toast(await navigator.storage.persist()?T("persistOk"):T("persistNo")); paintQuota(); }};
 async function paintQuota(){
   if(!navigator.storage?.estimate) return;
-  const e = await navigator.storage.estimate();
-  $("#quota").textContent = (e.usage/1048576).toFixed(1)+" MB belegt von "+(e.quota/1073741824).toFixed(1)+" GB";
+  const e=await navigator.storage.estimate();
+  $("#quota").textContent=T("quota",(e.usage/1048576).toFixed(1),(e.quota/1073741824).toFixed(1));
 }
-
-/* Einstellungsfelder */
+function paintTime(){ $("#tLabel").textContent=tLabel(SET.tIdx); $("#tRange").value=SET.tIdx; }
+$("#tRange").oninput=e=>{ SET.tIdx=+e.target.value; saveSet(); paintTime(); renderMap(); };
+$("#tRange").onchange=()=>{ if(cloudReady()&&navigator.onLine) pullRemote(); };
+$("#fAll").onclick=()=>{ SET.onlyMine=false; saveSet(); paintFilter(); renderMap(); };
+$("#fMine").onclick=()=>{ SET.onlyMine=true; saveSet(); paintFilter(); renderMap(); };
+function paintFilter(){
+  $("#fAll").setAttribute("aria-pressed",!SET.onlyMine);
+  $("#fMine").setAttribute("aria-pressed",SET.onlyMine);
+}
+function paintHints(){
+  $("#hRange").textContent=T("hRange",SET.range);
+  $("#hFov").textContent=T("hFov",SET.fov);
+  $("#hGeoid").textContent=T("hGeoid");
+  $("#hDecl").textContent=T("hDecl");
+  $("#hName").textContent=T("hName");
+  $("#hServer").textContent=T("hServer");
+  $("#hPrivacy").textContent=T("hPrivacy");
+  $("#calState").textContent = calibrated
+    ? T("sCalibDone", Number(SET.calibDem).toFixed(0), SET.geoid)
+    : T("sCalibNone");
+}
 function bindSettings(){
-  $("#ver").textContent = "v"+APP_VERSION;
-  const rng=$("#setRange"), fov=$("#setFov");
+  $("#ver").textContent="v"+APP_VERSION;
+  const rng=$("#setRange"),fov=$("#setFov");
   rng.value=SET.range; fov.value=SET.fov; $("#setGeoid").value=SET.geoid; $("#setDecl").value=SET.decl;
-  $("#setRangeV").textContent=SET.range; $("#setFovV").textContent=SET.fov;
-  rng.oninput = ()=>{ SET.range=+rng.value; $("#setRangeV").textContent=SET.range; saveSet(); };
-  rng.onchange = redrawMap;
-  fov.oninput = ()=>{ SET.fov=+fov.value; $("#setFovV").textContent=SET.fov; saveSet(); };
-  fov.onchange = redrawMap;
-  $("#setGeoid").onchange = e=>{ SET.geoid=+e.target.value||0; saveSet(); paintReadout(); };
-  $("#setDecl").onchange = e=>{ SET.decl=+e.target.value||0; saveSet(); };
+  $("#setAutor").value=SET.autor; $("#setUrl").value=SET.cloudUrl; $("#setKey").value=SET.cloudKey;
+  $("#setLang").value=SET.lang;
+  rng.oninput=()=>{SET.range=+rng.value;$("#hRange").textContent=T("hRange",SET.range);saveSet();};
+  rng.onchange=renderMap;
+  fov.oninput=()=>{SET.fov=+fov.value;$("#hFov").textContent=T("hFov",SET.fov);saveSet();};
+  fov.onchange=renderMap;
+  $("#setGeoid").onchange=e=>{SET.geoid=+e.target.value||0;saveSet();paintReadout();};
+  $("#setDecl").onchange=e=>{SET.decl=+e.target.value||0;saveSet();};
+  $("#setAutor").onchange=e=>{ SET.autor=e.target.value.trim().slice(0,24);
+    if(SET.autor && SET.postAs!=="name") SET.postAs="name";
+    saveSet(); paintPostAs(); };
+  $("#setWho").onclick=e=>{ const b=e.target.closest(".chip"); if(!b||b.disabled) return;
+    SET.postAs=b.dataset.w; saveSet(); paintPostAs(); };
+  $("#setUrl").onchange=e=>{SET.cloudUrl=e.target.value.trim().replace(/\/$/,"");saveSet();paintShare();};
+  $("#setKey").onchange=e=>{SET.cloudKey=e.target.value.trim();saveSet();paintShare();};
+  $("#setLang").onchange=e=>{ SET.lang=e.target.value; saveSet(); applyLanguage(); };
+  $("#swShare").onclick=()=>{
+    if(!cloudReady()){ toast(T("noServer")); return; }
+    SET.share=!SET.share; saveSet(); paintShare(); };
+}
+function paintPostAs(){
+  const named = !!SET.autor;
+  if(!named) SET.postAs="anon";
+  $("#whoName").textContent = named ? SET.autor : T("sName");
+  $("#whoName").disabled = !named;
+  $("#whoName").style.opacity = named ? "1" : ".4";
+  $("#setWho").querySelectorAll(".chip").forEach(c=>
+    c.setAttribute("aria-pressed", c.dataset.w===SET.postAs));
+}
+function paintShare(){
+  if(!cloudReady()) SET.share=false;
+  $("#swShare").setAttribute("aria-checked",SET.share);
+  $("#shareHint").textContent = !cloudReady() ? T("shareNoSrv") : SET.share ? T("shareOn") : T("shareOff");
+}
+function applyLanguage(){
+  setLang(); buildTape(); paintTime(); paintHints(); paintShare(); paintPostAs();
+  paintReadout(); paintSensState(); paintSyncState(); paintQuota();
+  refreshList(); renderMap();
 }
 
 /* Start */
-bindSettings(); paintQuota(); refreshList();
+if(SET.calibDem!=null) calibrated=true;
+setLang(); bindSettings(); buildTape(); paintTime(); paintFilter(); paintHints(); paintShare(); paintPostAs();
+paintQuota(); refreshList(); paintReadout();
 startOrient(); startGeo(); startCamera();
-DB.all().then(a=>{ if(a.length){ const last=a[a.length-1]; if(last.thumb) $("#lastthumb").src=URL.createObjectURL(last.thumb); }});
+$("#noCamTxt").textContent = T("camHint");
+DB.all("shots").then(a=>{ if(a.length){ const l=a[a.length-1]; if(l.thumb) $("#lastthumb").src=URL.createObjectURL(l.thumb); }});
+if(cloudReady()) setTimeout(pushPending,3000);
 if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script>
 </body>

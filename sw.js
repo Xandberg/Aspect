@@ -1,47 +1,48 @@
-/* Feldblick – Service Worker
-   Hülle: fest zwischengespeichert. Kartenkacheln: bei Bedarf, dauerhaft. */
-const SHELL = "feldblick-shell-v1";
-const TILES = "feldblick-tiles";
+/* Aspect Conditions – Service Worker */
+const SHELL = "aspect-shell-v4";
+const TILES = "aspect-tiles";
+const MEDIA = "aspect-media";
 
-const FILES = [
-  "./", "./index.html", "./manifest.webmanifest",
-  "./icon-192.png", "./icon-512.png", "./icon-512-maskable.png"
-];
+const FILES = ["./", "./index.html", "./manifest.webmanifest",
+  "./icon-192.png", "./icon-512.png", "./icon-512-maskable.png"];
 
-self.addEventListener("install", e => {
-  e.waitUntil(caches.open(SHELL).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
-});
+self.addEventListener("install", e =>
+  e.waitUntil(caches.open(SHELL).then(c => c.addAll(FILES)).then(() => self.skipWaiting())));
 
-self.addEventListener("activate", e => {
+self.addEventListener("activate", e =>
   e.waitUntil(caches.keys()
-    .then(keys => Promise.all(keys.filter(k => k !== SHELL && k !== TILES).map(k => caches.delete(k))))
-    .then(() => self.clients.claim()));
-});
+    .then(k => Promise.all(k.filter(n => ![SHELL, TILES, MEDIA].includes(n)).map(n => caches.delete(n))))
+    .then(() => self.clients.claim())));
+
+async function cacheFirst(req, cacheName) {
+  const cache = await caches.open(cacheName);
+  const hit = await cache.match(req);
+  if (hit) return hit;
+  try {
+    const res = await fetch(req);
+    if (res.ok || res.type === "opaque") cache.put(req, res.clone());
+    return res;
+  } catch (err) {
+    return new Response("", { status: 504 });
+  }
+}
 
 self.addEventListener("fetch", e => {
   const url = new URL(e.request.url);
   if (e.request.method !== "GET") return;
 
-  // Kartenkacheln: erst Cache, sonst Netz und ablegen
-  if (url.hostname.endsWith("tile.openstreetmap.org")) {
-    e.respondWith(caches.open(TILES).then(async cache => {
-      const hit = await cache.match(e.request);
-      if (hit) return hit;
-      try {
-        const res = await fetch(e.request);
-        cache.put(e.request, res.clone());
-        return res;
-      } catch (err) {
-        return new Response("", { status: 504 });
-      }
-    }));
-    return;
-  }
+  // Kartenkacheln
+  if (url.hostname.endsWith("tile.openstreetmap.org"))
+    return e.respondWith(cacheFirst(e.request, TILES));
 
-  // Höhenmodell nie aus dem Cache beantworten
-  if (url.hostname.includes("open-meteo.com")) return;
+  // Geteilte Fotos: einmal geladen, danach auch offline sichtbar
+  if (url.pathname.includes("/storage/v1/object/public/"))
+    return e.respondWith(cacheFirst(e.request, MEDIA));
 
-  // App-Hülle: erst Cache, im Hintergrund auffrischen
+  // Datenbank und Höhenmodell immer frisch holen
+  if (url.pathname.startsWith("/rest/v1/") || url.hostname.includes("open-meteo.com")) return;
+
+  // App-Hülle
   e.respondWith(caches.open(SHELL).then(async cache => {
     const hit = await cache.match(e.request, { ignoreSearch: true });
     const net = fetch(e.request).then(res => {
