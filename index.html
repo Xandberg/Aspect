@@ -959,7 +959,7 @@ const CLOUD_DEFAULT = {
   key: CFG.key || ""    // the public anon key
 };
 
-const APP_VERSION = "4.0.0";
+const APP_VERSION = "4.1.0";
 
 /* =========================================================
    Sprachen
@@ -1926,6 +1926,15 @@ async function pullRemote(){
     for(const r of rows) await DB.put("fremde",{
       id:r.id, ts:Date.parse(r.ts), lat:r.lat, lon:r.lon, altMsl:r.alt_msl, heading:r.heading,
       kategorie:r.kategorie||"other", notiz:r.notiz||"", autor:r.autor||"", foto:r.foto, holTs:Date.now() });
+    // Was der Server im abgefragten Zeitraum nicht mehr liefert, ist dort geloescht
+    // worden und verschwindet auch hier. Bei voller Trefferliste wird nicht
+    // aufgeraeumt, weil dann Eintraege nur wegen der Obergrenze fehlen koennten.
+    if(rows.length < 1000){
+      const vorhanden = new Set(rows.map(r=>r.id));
+      const grenze = (h==null) ? 0 : Date.now()-h*3600e3;
+      for(const alt of await DB.all("fremde"))
+        if(alt.ts>=grenze && !vorhanden.has(alt.id)) await DB.del("fremde",alt.id);
+    }
     lastError=""; toast(T("loadedN",rows.length)); renderMap();
   }catch(e){ lastError=String(e.message||e); toast(T("serverFail")+" · "+lastError); }
   paintSyncState();
