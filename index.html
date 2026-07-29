@@ -862,10 +862,6 @@ label.field .hint{display:block;margin-top:7px;font-size:11px;color:var(--sand-d
         <div class="num" style="font-size:12px;color:var(--sand-dim)" id="sensState">–</div></div>
         <button class="btn go" id="askPerm" data-i18n="sGrant"></button></div>
 
-      <div class="rowline"><div><div class="eyebrow" data-i18n="sShare"></div>
-        <div class="sub" id="shareHint"></div></div>
-        <button class="sw" id="swShare" role="switch" aria-checked="false"></button></div>
-
       <label class="field"><span class="eyebrow" data-i18n="sName"></span>
         <input type="text" id="setAutor" maxlength="24">
         <span class="hint" id="hName"></span></label>
@@ -922,6 +918,10 @@ label.field .hint{display:block;margin-top:7px;font-size:11px;color:var(--sand-d
           <input type="text" id="setKey" placeholder="sb_publishable_..."></label>
       </div>
 
+      <div class="rowline"><div><div class="eyebrow" data-i18n="sShare"></div>
+        <div class="sub" id="shareHint"></div></div>
+        <button class="sw" id="swShare" role="switch" aria-checked="false"></button></div>
+
       <div id="hPrivacy" style="padding:18px 14px 40px;color:var(--sand-dim);font-size:11px;line-height:1.7"></div>
     </div>
   </section>
@@ -959,13 +959,16 @@ const CLOUD_DEFAULT = {
   key: CFG.key || ""    // the public anon key
 };
 
-const APP_VERSION = "4.1.0";
+const APP_VERSION = "4.2.0";
 
 /* =========================================================
    Sprachen
    ========================================================= */
 const I18N = {
 de:{
+ capReview:"Neue Aufnahme",
+ capDiscard:"Verwerfen",
+ capDropped:"Verworfen",
  sAdvanced:"Erweitert",
  dPlace:"Ort setzen",
  pickHint:"Auf die Karte tippen, um den Standpunkt zu setzen.",
@@ -982,7 +985,7 @@ de:{
  libBtn:"Bibliothek",libBusy:"Wird gelesen …",libDone:"{0} übernommen · {1} ohne Position",
  libNone:"Keine Bilder gelesen",savedShared:"Gespeichert & gesendet",dEdit:"Bedingung & Notiz",
  srcLib:"importiert",editSaved:"Übernommen",editRemoteFail:"Nur lokal geändert – Server nicht erreichbar",
- navCam:"Aufnahme",navMap:"Karte",navArc:"Archiv",navSet:"Setup",sensor:"Sensor",
+ navCam:"Aufnahme",navMap:"Karte",navArc:"Archiv",navSet:"Setup",sensor:"± m",
  camOff:"Kamera nicht aktiv",camStart:"Kamera starten",
  camHint:"Tippe auf „Kamera starten“ und erlaube den Zugriff.",
  camDenied:"Kamerazugriff abgelehnt oder belegt. In den Website-Einstellungen erlauben und neu starten.",
@@ -1033,6 +1036,9 @@ de:{
  hPrivacy:"Aufnahmen liegen immer zuerst auf dem Gerät. Geteilte Beiträge sind für alle sichtbar, die diese App nutzen – ohne Anmeldung, ohne Prüfung. Lade nichts hoch, das Personen zeigt. Kartenkacheln von OpenStreetMap."
 },
 en:{
+ capReview:"New photo",
+ capDiscard:"Discard",
+ capDropped:"Discarded",
  sAdvanced:"Advanced",
  dPlace:"Set location",
  pickHint:"Tap the map to set the viewpoint.",
@@ -1049,7 +1055,7 @@ en:{
  libBtn:"Library",libBusy:"Reading …",libDone:"{0} imported · {1} without position",
  libNone:"No images read",savedShared:"Saved & sent",dEdit:"Conditions & note",
  srcLib:"imported",editSaved:"Updated",editRemoteFail:"Changed locally only – server unreachable",
- navCam:"Capture",navMap:"Map",navArc:"Archive",navSet:"Setup",sensor:"Sensor",
+ navCam:"Capture",navMap:"Map",navArc:"Archive",navSet:"Setup",sensor:"± m",
  camOff:"Camera inactive",camStart:"Start camera",
  camHint:"Tap “Start camera” and allow access.",
  camDenied:"Camera access denied or in use. Allow it in site settings and restart.",
@@ -1100,6 +1106,9 @@ en:{
  hPrivacy:"Photos always stay on the device first. Shared reports are visible to everyone using this app – no account, no moderation. Don't upload anything showing people. Map tiles by OpenStreetMap."
 },
 fr:{
+ capReview:"Nouvelle photo",
+ capDiscard:"Jeter",
+ capDropped:"Jetée",
  sAdvanced:"Avancé",
  dPlace:"Définir le lieu",
  pickHint:"Touchez la carte pour placer le point de vue.",
@@ -1116,7 +1125,7 @@ fr:{
  libBtn:"Galerie",libBusy:"Lecture …",libDone:"{0} importées · {1} sans position",
  libNone:"Aucune image lue",savedShared:"Enregistré et envoyé",dEdit:"Conditions & note",
  srcLib:"importée",editSaved:"Mis à jour",editRemoteFail:"Modifié en local seulement – serveur injoignable",
- navCam:"Prise",navMap:"Carte",navArc:"Archive",navSet:"Réglages",sensor:"Capteur",
+ navCam:"Prise",navMap:"Carte",navArc:"Archive",navSet:"Réglages",sensor:"± m",
  camOff:"Caméra inactive",camStart:"Activer la caméra",
  camHint:"Touchez « Activer la caméra » et autorisez l'accès.",
  camDenied:"Accès refusé ou caméra occupée. Autorisez-le dans les réglages du site puis relancez.",
@@ -1167,6 +1176,9 @@ fr:{
  hPrivacy:"Les photos restent d'abord sur l'appareil. Les observations partagées sont visibles par tous les utilisateurs – sans compte ni modération. Ne publiez rien montrant des personnes. Fonds de carte OpenStreetMap."
 },
 it:{
+ capReview:"Nuova foto",
+ capDiscard:"Scarta",
+ capDropped:"Scartata",
  sAdvanced:"Avanzate",
  dPlace:"Imposta luogo",
  pickHint:"Tocca la mappa per fissare il punto di ripresa.",
@@ -1183,7 +1195,7 @@ it:{
  libBtn:"Galleria",libBusy:"Lettura …",libDone:"{0} importate · {1} senza posizione",
  libNone:"Nessuna immagine letta",savedShared:"Salvato e inviato",dEdit:"Condizioni e nota",
  srcLib:"importata",editSaved:"Aggiornato",editRemoteFail:"Modificato solo in locale – server irraggiungibile",
- navCam:"Scatto",navMap:"Mappa",navArc:"Archivio",navSet:"Impostazioni",sensor:"Sensore",
+ navCam:"Scatto",navMap:"Mappa",navArc:"Archivio",navSet:"Impostazioni",sensor:"± m",
  camOff:"Fotocamera inattiva",camStart:"Avvia fotocamera",
  camHint:"Tocca « Avvia fotocamera » e consenti l'accesso.",
  camDenied:"Accesso negato o fotocamera occupata. Consentilo nelle impostazioni del sito e riavvia.",
@@ -1234,6 +1246,9 @@ it:{
  hPrivacy:"Le foto restano prima di tutto sul dispositivo. Le segnalazioni condivise sono visibili a chiunque usi l'app – senza registrazione né moderazione. Non caricare immagini con persone. Mappe di OpenStreetMap."
 },
 es:{
+ capReview:"Nueva foto",
+ capDiscard:"Descartar",
+ capDropped:"Descartada",
  sAdvanced:"Avanzado",
  dPlace:"Fijar lugar",
  pickHint:"Toca el mapa para situar el punto de vista.",
@@ -1250,7 +1265,7 @@ es:{
  libBtn:"Galería",libBusy:"Leyendo …",libDone:"{0} importadas · {1} sin posición",
  libNone:"No se leyó ninguna imagen",savedShared:"Guardado y enviado",dEdit:"Condiciones y nota",
  srcLib:"importada",editSaved:"Actualizado",editRemoteFail:"Cambiado solo en local – servidor inaccesible",
- navCam:"Captura",navMap:"Mapa",navArc:"Archivo",navSet:"Ajustes",sensor:"Sensor",
+ navCam:"Captura",navMap:"Mapa",navArc:"Archivo",navSet:"Ajustes",sensor:"± m",
  camOff:"Cámara inactiva",camStart:"Activar cámara",
  camHint:"Toca « Activar cámara » y permite el acceso.",
  camDenied:"Acceso denegado o cámara ocupada. Permítelo en los ajustes del sitio y reinicia.",
@@ -1339,7 +1354,7 @@ const uid = () => crypto.randomUUID ? crypto.randomUUID()
    ========================================================= */
 const OLD = localStorage.getItem("hangblick.set") || localStorage.getItem("feldblick.set");
 const SET = Object.assign(
-  { range:2000, fov:65, geoid:48, decl:0, share:false, autor:"", postAs:"anon", tIdx:2, onlyMine:false,
+  { range:2000, fov:65, geoid:48, decl:0, share:true, autor:"", postAs:"anon", tIdx:2, onlyMine:false,
     lang:"auto", cloudUrl:CLOUD_DEFAULT.url, cloudKey:CLOUD_DEFAULT.key },
   JSON.parse(localStorage.getItem("aspect.set") || OLD || "{}"));
 if(CLOUD_DEFAULT.url) SET.cloudUrl = CLOUD_DEFAULT.url;
@@ -1595,15 +1610,43 @@ async function capture(){
   const raw=await new Promise(r=>c.toBlob(r,"image/jpeg",.88));
   const rec={ id:uid(), ts:Date.now(), lat:S.lat, lon:S.lon, acc:S.acc,
     altEll:S.altEll, altMsl:altMsl(), altAcc:S.altAcc, geoid:SET.geoid,
-    heading:S.heading, tilt:S.tilt, w:c.width, h:c.height,
+    heading:S.heading, tilt:S.tilt, fov:SET.fov, w:c.width, h:c.height,
     kategorie:"other", notiz:"", autor:autorNow(), geheim:uid(),
     sync:(SET.share && cloudReady() && S.lat!=null) ? 1 : 0, quelle:"cam" };
   rec.blob=await withExif(raw,rec);
   rec.thumb=await shrink(raw,240,.72);
-  await DB.put("shots",rec);
-  $("#lastthumb").src=URL.createObjectURL(rec.thumb);
-  refreshList(); renderMap();
-  if(rec.sync===1){ toast(T("savedShared")); pushPending(); } else toast(T("savedLocal"));
+  openReview(rec);
+}
+
+// Vorschau mit allen erfassten Werten. Erst hier wird gespeichert.
+function openReview(rec){
+  const sh=$("#sheet");
+  const zeile=(k,v)=>'<div style="display:flex;justify-content:space-between;gap:12px;padding:7px 0;'
+    +'border-bottom:1px solid var(--ink-2)"><span class="eyebrow">'+k+'</span>'
+    +'<span class="num" style="font-size:13px">'+v+'</span></div>';
+  sh.innerHTML='<div class="head"><h2>'+T("capReview")+'</h2></div>'
+    +'<div class="scroll"><img id="rvImg" style="width:100%;max-height:42vh;object-fit:cover;display:block" alt="">'
+    +'<div style="padding:14px">'
+    + zeile(T("dPos"), rec.lat!=null?rec.lat.toFixed(5)+" / "+rec.lon.toFixed(5):"–")
+    + zeile(T("dAcc"), rec.acc!=null?"± "+Math.round(rec.acc)+" m":"–")
+    + zeile(T("dAlt"), rec.altMsl!=null?Math.round(rec.altMsl)+" m":"–")
+    + zeile(T("dDir"), rec.heading!=null?Math.round(rec.heading)+"° "+cardinal(rec.heading):"–")
+    + zeile(T("sFov"), Math.round(rec.fov)+"°")
+    + zeile(T("dTime"), stamp(rec.ts))
+    + zeile(T("sShare"), rec.sync===1 ? (rec.autor||T("dAnon")) : T("stLocal"))
+    +'<div style="display:flex;gap:8px;margin-top:18px">'
+    +'<button class="btn go" id="rvSave" style="flex:1">'+T("shSave")+'</button>'
+    +'<button class="btn warn" id="rvDrop">'+T("capDiscard")+'</button></div>'
+    +'</div></div>';
+  blattAuf();
+  $("#rvImg").src=URL.createObjectURL(rec.thumb);
+  $("#rvDrop").onclick=()=>{ blattZu(); toast(T("capDropped")); };
+  $("#rvSave").onclick=async()=>{
+    await DB.put("shots",rec);
+    $("#lastthumb").src=URL.createObjectURL(rec.thumb);
+    blattZu(); refreshList(); renderMap();
+    if(rec.sync===1){ toast(T("savedShared")); pushPending(true); } else toast(T("savedLocal"));
+  };
 }
 const autorNow = () => (SET.postAs==="name" && SET.autor) ? SET.autor : "";
 
@@ -1715,7 +1758,7 @@ async function importFiles(files){
       const rec = { id:uid(), ts:meta.ts || f.lastModified || Date.now(),
         lat:meta.lat!=null?meta.lat:null, lon:meta.lon!=null?meta.lon:null, acc:null,
         altEll:null, altMsl:meta.altMsl!=null?meta.altMsl:null, altAcc:null, geoid:0,
-        heading:hdg!=null?hdg:null, tilt:null,
+        heading:hdg!=null?hdg:null, tilt:null, fov:SET.fov,
         kategorie:"other", notiz:"", autor:autorNow(), geheim:uid(),
         sync:(SET.share && cloudReady() && meta.lat!=null) ? 1 : 0, quelle:"lib" };
       rec.blob = f;                       // Original bleibt unangetastet, EXIF erhalten
@@ -1820,13 +1863,22 @@ const Cloud = {
     if(!r.ok && r.status!==409) throw new Error("Upload "+r.status);
   },
   async insert(row){
-    const r=await fetch(cloudBase()+"/rest/v1/sichtungen",
+    const senden = k => fetch(cloudBase()+"/rest/v1/sichtungen",
       {method:"POST",headers:this.h({"Content-Type":"application/json",Prefer:"return=minimal"}),
-       body:JSON.stringify(row)});
-    if(!r.ok && r.status!==409) throw new Error("Insert "+r.status);
+       body:JSON.stringify(k)});
+    let r = await senden(row);
+    if(!r.ok && r.status!==409){
+      const txt = await r.text();
+      // Aelterer Server ohne Spalte fov: einmal ohne sie versuchen
+      if(/fov/.test(txt)){
+        const ohne = Object.assign({},row); delete ohne.fov;
+        r = await senden(ohne);
+      }
+      if(!r.ok && r.status!==409) throw new Error("Insert "+r.status);
+    }
   },
   async list(sinceIso){
-    const q="/rest/v1/sichtungen?select=id,ts,lat,lon,alt_msl,heading,kategorie,notiz,autor,foto"
+    const q="/rest/v1/sichtungen?select=id,ts,lat,lon,alt_msl,heading,fov,kategorie,notiz,autor,foto"
       +(sinceIso?"&ts=gte."+sinceIso:"")+"&order=ts.desc&limit=1000";
     const r=await fetch(cloudBase()+q,{headers:this.h()});
     if(!r.ok) throw new Error("HTTP "+r.status+" "+(await r.text()).slice(0,80));
@@ -1883,8 +1935,8 @@ function zeigeTest(zeilen){
     + '<div class="scroll" style="padding:14px"><pre style="font-family:var(--mono);font-size:11px;'
     + 'line-height:1.6;white-space:pre-wrap;word-break:break-all;color:var(--sand)">'
     + esc(zeilen.join("\n")) + '</pre></div>';
-  sh.classList.add("on");
-  $("#tClose").onclick = () => sh.classList.remove("on");
+  blattAuf();
+  $("#tClose").onclick = () => blattZu();
 }
 async function pushPending(sofort){
   if(pushing||!cloudReady()||!navigator.onLine) return;
@@ -1901,7 +1953,7 @@ async function pushPending(sofort){
         await Cloud.put("mini/"+name, rec.thumb);
         await Cloud.insert({ id:rec.id, ts:new Date(rec.ts).toISOString(),
           lat:rec.lat, lon:rec.lon, acc:rec.acc, alt_msl:rec.altMsl, alt_ell:rec.altEll,
-          heading:rec.heading, tilt:rec.tilt, kategorie:rec.kategorie, notiz:rec.notiz,
+          heading:rec.heading, tilt:rec.tilt, fov:rec.fov, kategorie:rec.kategorie, notiz:rec.notiz,
           autor:rec.autor||null, geheim:rec.geheim, foto:name });
         rec.sync=2; await DB.put("shots",rec);
         fehlVersuche=0; naechsterVersuch=0; lastError="";
@@ -1924,7 +1976,7 @@ async function pullRemote(){
   try{
     const rows=await Cloud.list(since);
     for(const r of rows) await DB.put("fremde",{
-      id:r.id, ts:Date.parse(r.ts), lat:r.lat, lon:r.lon, altMsl:r.alt_msl, heading:r.heading,
+      id:r.id, ts:Date.parse(r.ts), lat:r.lat, lon:r.lon, altMsl:r.alt_msl, heading:r.heading, fov:r.fov,
       kategorie:r.kategorie||"other", notiz:r.notiz||"", autor:r.autor||"", foto:r.foto, holTs:Date.now() });
     // Was der Server im abgefragten Zeitraum nicht mehr liefert, ist dort geloescht
     // worden und verschwindet auch hier. Bei voller Trefferliste wird nicht
@@ -1963,9 +2015,10 @@ function initMap(){
   layerShots=L.layerGroup().addTo(map);
 }
 const cutoff=()=>{ const h=TSTEPS[SET.tIdx]; return h==null?null:Date.now()-h*3600e3; };
-function conePoly(lat,lon,heading){
-  const half=SET.fov/2, pts=[[lat,lon]];
-  for(let a=-half;a<=half;a+=Math.max(2,SET.fov/24)) pts.push(destPoint(lat,lon,heading+a,SET.range));
+function conePoly(lat,lon,heading,fov){
+  const w = (fov==null || isNaN(fov)) ? SET.fov : fov;   // je Aufnahme gespeichert
+  const half=w/2, pts=[[lat,lon]];
+  for(let a=-half;a<=half;a+=Math.max(2,Math.max(w,2)/24)) pts.push(destPoint(lat,lon,heading+a,SET.range));
   pts.push(destPoint(lat,lon,heading+half,SET.range));
   return pts;
 }
@@ -1976,7 +2029,7 @@ function freshness(ts){
 function drawOne(r,own){
   const col=own?"#FF6A2B":"#57C2A4", f=freshness(r.ts);
   if(r.heading!=null)
-    L.polygon(conePoly(r.lat,r.lon,r.heading),
+    L.polygon(conePoly(r.lat,r.lon,r.heading,r.fov),
       {color:col,weight:1,opacity:.35+.6*f,fillColor:col,fillOpacity:.07+.23*f})
       .addTo(layerShots).on("click",()=>own?openShot(r):openRemote(r));
   const m=L.marker([r.lat,r.lon],{icon:L.divIcon({className:"",
@@ -2110,7 +2163,7 @@ function openShot(rec){
     +'<textarea id="eNote" rows="3" placeholder="'+esc(T("shNotePh"))+'">'+esc(rec.notiz||"")+'</textarea></label>'
     +'<button class="btn" id="eSave" style="margin-top:10px;width:100%">'+T("shSave")+'</button>'
     +'</div></div></div>';
-  sh.classList.add("on");
+  blattAuf();
   sh.querySelector("img").src=URL.createObjectURL(rec.blob);
   let kat=rec.kategorie;
   $("#eKats").onclick=e=>{ const b=e.target.closest(".chip"); if(!b) return; kat=b.dataset.k;
@@ -2123,16 +2176,37 @@ function openShot(rec){
       const ok=await Cloud.update(rec.id,rec.geheim,rec.kategorie,rec.notiz);
       if(!ok) msg=T("editRemoteFail");
     }
-    sh.classList.remove("on"); refreshList(); renderMap(); toast(msg); };
-  $("#shClose").onclick=()=>sh.classList.remove("on");
+    blattZu(); refreshList(); renderMap(); toast(msg); };
+  $("#shClose").onclick=()=>blattZu();
   $("#shSave").onclick=()=>download(rec.blob,shotName(rec));
   if($("#shShare")) $("#shShare").onclick=async()=>{ rec.sync=1; rec.autor=(SET.postAs==="name"&&SET.autor)?SET.autor:"";
-    await DB.put("shots",rec); sh.classList.remove("on"); refreshList(); toast(T("sending")); pushPending(); };
-  $("#shMap").onclick=()=>{ sh.classList.remove("on"); show("v-map");
+    await DB.put("shots",rec); blattZu(); refreshList(); toast(T("sending")); pushPending(); };
+  $("#shMap").onclick=()=>{ blattZu(); show("v-map");
     if(rec.lat!=null) map.setView([rec.lat,rec.lon],15); };
   $("#shPlace").onclick=()=>openPlacePicker(rec);
 }
-let pickMap=null;
+let pickMap=null, blattOffen=false, blattEnde=null;
+
+// Ein offenes Blatt haengt sich in den Verlauf ein. Die Zurueck-Taste des
+// Geraets schliesst dann das Blatt, statt die App zu verlassen.
+function blattAuf(aufraeumen){
+  blattEnde = aufraeumen || null;
+  $("#sheet").classList.add("on");
+  if(!blattOffen){ blattOffen=true; history.pushState({blatt:1},""); }
+}
+function blattZu(){
+  if(!blattOffen){ $("#sheet").classList.remove("on"); return; }
+  blattOffen=false;
+  $("#sheet").classList.remove("on");
+  if(blattEnde){ try{ blattEnde(); }catch(e){} blattEnde=null; }
+  if(history.state && history.state.blatt) history.back();
+}
+window.addEventListener("popstate", ()=>{
+  if(!blattOffen) return;
+  blattOffen=false;
+  $("#sheet").classList.remove("on");
+  if(blattEnde){ try{ blattEnde(); }catch(e){} blattEnde=null; }
+});
 function openPlacePicker(rec){
   const sh=$("#sheet");
   sh.innerHTML='<div class="head"><h2>'+T("dPlace")+'</h2>'
@@ -2146,7 +2220,7 @@ function openPlacePicker(rec){
     +(rec.heading!=null?Math.round(rec.heading):0)+'">'
     +'<button class="btn go" id="pSave" style="width:100%;margin-top:14px">'+T("shSave")+'</button>'
     +'</div>';
-  sh.classList.add("on");
+  blattAuf(()=>{ if(pickMap){ pickMap.remove(); pickMap=null; } });
 
   let lat = rec.lat, lon = rec.lon;
   let dir = rec.heading!=null ? Math.round(rec.heading) : 0;
@@ -2160,7 +2234,7 @@ function openPlacePicker(rec){
     if(lat==null) return;
     if(marke) pickMap.removeLayer(marke);
     if(kegel) pickMap.removeLayer(kegel);
-    kegel=L.polygon(conePoly(lat,lon,dir),
+    kegel=L.polygon(conePoly(lat,lon,dir,rec.fov),
       {color:"#FF6A2B",weight:1,opacity:.9,fillColor:"#FF6A2B",fillOpacity:.25}).addTo(pickMap);
     marke=L.marker([lat,lon],{icon:L.divIcon({className:"",
       html:'<div class="pin"></div>',iconSize:[14,14],iconAnchor:[7,7]})}).addTo(pickMap);
@@ -2171,7 +2245,7 @@ function openPlacePicker(rec){
   pickMap.on("click", e => { lat=e.latlng.lat; lon=e.latlng.lng; zeichne(); });
   $("#pDir").oninput = e => { dir=+e.target.value; $("#pDirV").textContent=dir+"°"; zeichne(); };
 
-  const schliessen=()=>{ if(pickMap){ pickMap.remove(); pickMap=null; } sh.classList.remove("on"); };
+  const schliessen=blattZu;
   $("#pClose").onclick = schliessen;
   $("#pSave").onclick = async () => {
     if(lat==null){ toast(T("pickHint")); return; }
@@ -2196,9 +2270,9 @@ function openRemote(r){
     +'<button class="btn" id="shClose">'+T("dClose")+'</button></div>'
     +'<div class="scroll"><img style="width:100%;display:block;background:var(--ink-2);min-height:120px" alt="">'
     +'<div style="padding:14px">'+detailBody(r)+'</div></div>';
-  sh.classList.add("on");
+  blattAuf();
   if(r.foto) sh.querySelector("img").src=Cloud.url("voll/"+r.foto);
-  $("#shClose").onclick=()=>sh.classList.remove("on");
+  $("#shClose").onclick=()=>blattZu();
 }
 const shotName=r=>"aspect_"+fileStamp(r.ts)
   +(r.lat!=null?"_"+r.lat.toFixed(5)+"_"+r.lon.toFixed(5):"")
@@ -2220,8 +2294,8 @@ async function buildGeoJSON(){
     const f=[{type:"Feature",geometry:{type:"Point",coordinates:[r.lon,r.lat,r.altMsl??0]},
       properties:Object.assign({type:"viewpoint"},props)}];
     if(r.heading!=null) f.push({type:"Feature",
-      geometry:{type:"Polygon",coordinates:[conePoly(r.lat,r.lon,r.heading).map(p=>[p[1],p[0]]).concat([[r.lon,r.lat]])]},
-      properties:Object.assign({type:"field_of_view",range_m:SET.range,fov_deg:SET.fov},props)});
+      geometry:{type:"Polygon",coordinates:[conePoly(r.lat,r.lon,r.heading,r.fov).map(p=>[p[1],p[0]]).concat([[r.lon,r.lat]])]},
+      properties:Object.assign({type:"field_of_view",range_m:SET.range,fov_deg:(r.fov!=null?r.fov:SET.fov)},props)});
     return f;})};
 }
 async function buildCSV(){
@@ -2410,6 +2484,13 @@ if(SET.calibDem!=null) calibrated=true;
 setLang(); bindSettings(); buildTape(); paintTime(); paintFilter(); paintHints(); paintShare(); paintPostAs();
 paintQuota(); refreshList(); paintReadout();
 startOrient(); startGeo(); startCamera();
+// Safari gibt die Lagesensoren nur nach einer echten Nutzeraktion frei.
+// Deshalb beim allerersten Tipp irgendwo im Fenster einmal nachfragen.
+if(typeof DeviceOrientationEvent!=="undefined" && DeviceOrientationEvent.requestPermission){
+  const einmal = () => { document.removeEventListener("pointerdown",einmal,true);
+    if(!S.headOk) askPermissions(); };
+  document.addEventListener("pointerdown",einmal,true);
+}
 $("#noCamTxt").textContent = T("camHint");
 DB.all("shots").then(a=>{ if(a.length){ const l=a[a.length-1]; if(l.thumb) $("#lastthumb").src=URL.createObjectURL(l.thumb); }});
 if(cloudReady()) setTimeout(pushPending,3000);
